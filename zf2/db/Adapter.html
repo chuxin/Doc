@@ -1,0 +1,188 @@
+<h2>Adapter</h2>
+数据库适配器
+1.会根据dsn，创建数据库驱动器driver
+2.根据$driver->getDatabasePlatformName()返回Platform.实例化Platform
+3.实例化ResultSet
+
+适配器有两个常用方法:Adapter::query()和Adapter::createStatement()
+<h2>Adapter::query()</h2>
+<pre>
+<?php
+	$db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+	$sql = "select * from album  WHERE id =:id";
+	$resultSet =  $db->query($sql,array(":id"=>5));
+	print_r($resultSet->toArray());
+
+    $sql = "select * from album";
+    //或者改变查询模式，$statement =  $db->query($sql,$db::QUERY_MODE_EXECUTE)就不用这么复杂了
+    $statement =  $db->query($sql);
+    $result = $statement->execute();
+    $resultSet = clone $db->getQueryResultSetPrototype();
+    $resultSet->initialize($result);
+    print_r($resultSet->toArray());
+?>
+</pre>
+<h2>Adapter::createStatement()</h2>
+<pre>
+<?php
+$db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $sql = "select * from album  WHERE id =:id";
+        $statement = $db->createStatement($sql,array(":id"=>5));
+        $result = $statement->execute();
+        foreach ($result as $album) {
+            print_r($album);
+        }
+?>
+</pre>
+
+
+<h2>platform</h2>
+数据库平台，格式化sql语句
+<pre>
+<?php
+$adapter = new Zend\Db\Adapter\Adapter($driverConfig);
+
+$qi = function($name) use ($adapter) { return $adapter->platform->quoteIdentifier($name); };
+$fp = function($name) use ($adapter) { return $adapter->driver->formatParameterName($name); };
+
+$sql = 'UPDATE ' . $qi('artist')
+    . ' SET ' . $qi('name') . ' = ' . $fp('name')
+    . ' WHERE ' . $qi('id') . ' = ' . $fp('id');
+
+/** @var $statement Zend\Db\Adapter\Driver\StatementInterface */
+$statement = $adapter->query($sql);
+
+$parameters = array(
+    'name' => 'Updated Artist',
+    'id' => 1
+);
+
+$statement->execute($parameters);
+
+// DATA INSERTED, NOW CHECK
+
+/* @var $statement Zend\Db\Adapter\DriverStatementInterface */
+$statement = $adapter->query('SELECT * FROM '
+    . $qi('artist')
+    . ' WHERE id = ' . $fp('id'));
+
+/* @var $results Zend\Db\ResultSet\ResultSet */
+$results = $statement->execute(array('id' => 1));
+
+$row = $results->current();
+$name = $row['name'];
+?>
+</pre>
+
+
+<h2>ResultSet</h2>
+在$adapter->query()中会将result注入到其中。可以使用$resultSet->toArray();
+ $resultSet->current()->getArrayCopy();
+
+<h2>ParameterContainer </h2>
+<pre>
+<?php
+$container->offsetSet('limit', 5);
+$container->offsetSet('limit', 5, $container::TYPE_INTEGER);
+?>
+</pre>
+
+
+
+<h2>driver</h2>
+<ul>
+	<li>connection  
+	 数据库连接可以说是对pdo的一个简单封装，其中resource属性就是pdo实例
+    被封装了常用的方法 beginTransaction(),commit(),rollback(),execute(),$this->resource->lastInsertId($name);
+
+    $connection->execute($sql),封装的其是PDO::query(),会返回个下面的result结果集下面那个
+	$connection->prepare($sql)该方法并没有执行PDO::prepare();而是返回一个Statement对象，然后使用其可以做预处理prepare()和execute();
+
+	 </li>
+	<li>result 这里的resource是PDOStatement实例，该类实现了迭代。包含了一个PDOStatement 对象，所以可以用foreach循环结果集 
+		使用关联数组返回数据。
+		$this->resource->fetch(\PDO::FETCH_ASSOC);//是fetch不是fetchAll哟
+<pre>
+<?php
+        $db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $result = $db->getDriver()->getConnection()->execute("select * from album");
+
+        foreach ($result  as $album) {
+            print_r($album);
+        }
+?>
+</pre>
+
+	</li>
+		<li>Statement  
+在这里可以做预处理prepare()和execute();  这里默认使用的PDO::bindParams()
+<pre>
+<?php
+        $db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $sql = "select * from album  WHERE id =:id";
+        $statement = $db->getDriver()->createStatement($sql);
+        //$statement = $db->getDriver()->getConnection()->prepare($sql);
+        $result = $statement->execute(array(":id"=>5));
+        
+        foreach ($result as $album) {
+            print_r($album);
+        }
+
+?>
+</pre>
+可以在$driver 这里直接处理。
+<pre>
+<?php
+$db = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+        $sql = "select * from album  WHERE id =:id";
+        $statement = $db->createStatement($sql,array(":id"=>5));
+        $result = $statement->execute();
+        foreach ($result as $album) {
+            print_r($album);
+        }
+
+?>
+</pre>
+
+		</li>
+</ul>
+
+
+schema即是方案的意思，是oracle数据库中数据对象的集合，包括表、视图、索引等。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

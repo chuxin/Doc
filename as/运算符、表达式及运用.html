@@ -1,0 +1,76 @@
+<h2>运算符的本质:</h2>
+运算符本身是一种特殊的函数， 运算对象就是它的参数， 运算结果值就是它的返回值。 而每一个表达式都是单个运算符函数的组合， 表达式可以看成一个组合成的特殊函数，表达式的值就是该函数的返回值。
+
+
+当使用“&&”时，如果第一个表达式就返回 false，那么是不会执行第二个表达式的。只有第一个表达式返回 true，才会执行第二个表达式。
+当使用“||”时，如果第一个表达式就返回 true，那么是不会执行第二个表达式的。只有第一个表达式返回 false，才会执行第二个表达式。
+
+
+<h2>typeof、is、as </h2>
+typeof 是用字符串形式返回对象的类型。使用方法如下：
+<pre>
+trace (typeof 10);  
+</pre>
+
+注意，返回的字符串不一定是类名的小写，typeof 对象类型与返回结果对照表
+对象类型  		返回结果
+Array  			object 
+Boolean  		boolean 
+Function  		function 
+int  			number 
+Number 			number 
+Object  		object 
+String  		string 
+uint  			number 
+XML  			xml 
+XMLList  		xml 
+
+
+is 用来判断一个对象是否属于一种类型， 返回布尔值，true 代表属于，fal se 表示不属于。使用格式如下：
+<pre>
+trace (9 is Number);     //输出：true
+</pre>
+
+as 与 is 格式一致， 内容不同： 如果一个对象属于一种类型， 那么 as 返回这个对象；否则返回 null。
+<pre>
+trace (9 as Number);    //输出：9 
+trace (9 as Array);   //输出：null 
+</pre>
+
+
+<h2>in</h2>
+in 关键字用来判断一个对象是否作为另一个对象的键（Key）或索引，存在返回 true，不存在返回 false。
+<pre>
+var a:Array = ["q","w","e"]; 
+trace(2 in a);                           //数组 a 含有索引 2，所以为 true 
+trace(3 in a);                  		 //只有个元素，没有索引为 3 的元素，所以为 false 
+var b:Object = {ary:a, name:"ok"}; 
+trace ("ary" in b);              		 //true，确实有 ary 为键的属性
+trace ("name" in b);       				 //同上
+import flash.util s.Di ctionary; 
+var c:Dictionary = newDictionary();      //建立字典对象
+c[a] = "a value";                        //把数组 a 作为键
+c[b] = "b value";                        //把对象 b 也作为键
+trace (a in c);                          //输出 true 
+trace (b in c);                          //输出 true 
+</pre>		
+
+
+<h2>delete</h2>
+delete 删除引用,删除由 reference 指定的对象属性；不能删除用 var 语句声明的固定属性或变量。固定属性是类定义中的变量或方法。 
+
+如果 reference 参数不能删除，delete 运算符可能会失败并返回 false。
+
+除非类是运行时添加的动态类，否则不能使用 delete 运算符删除该类的属性。不能使用 delete 删除密封类的属性。而应当将该属性设置为 null。
+
+注意：尽管不能删除对象，但是可以通过删除对某个对象的所有引用来使该对象符合垃圾回收条件。对某个对象最常见的引用就是指向该对象的变量。可以通过将该变量设置为 null 来删除这样的引用。垃圾回收器会删除没有引用的所有对象。
+
+<pre>
+var b:Object = {ary:"one",name:"ok"}; 
+delete b;                          //会报错，不能这样删除了
+delete b.ary;                      //成功，因为 ary 是 b 对象的动态属性
+trace (b.ary);                      //输出：undefined 
+b = null; 
+trace(b);                         //输出： null， 那么 b 变量持有原有对象的引用就删除了
+</pre>
+

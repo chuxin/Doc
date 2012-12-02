@@ -1,0 +1,145 @@
+inputFilter 用来过滤和验证输入数据的正确性，例如用来过滤$_GET或者$_POST.
+
+
+InputFilter->setData() 下面的例子用来验证表单数据。
+1.可以为每个表单元素，使用addValidator() 添加一个或多个验证器
+2.使用这个 getInvalidInput() 方法获取无效数据
+3.使用setValidationGroup建立验证组
+4.使用getFilterChain()可以修改原数据
+
+有三种方法建立输入过滤：
+<h2>建立各种输入，然后添加到输入过滤</h2>
+<pre>
+<?php
+use Zend\InputFilter\InputFilter;
+use Zend\InputFilter\Input;
+use Zend\Validator;
+
+$email = new Input('email');
+$email->getValidatorChain()
+      ->addValidator(new Validator\EmailAddress());
+
+$input = new Input('foo');
+$input->getFilterChain()
+      ->attachByName('stringtrim')
+      ->attachByName('alpha');
+
+$inputFilter = new InputFilter();
+$inputFilter->add($email)
+            ->add($password)
+            ->setData($_POST);
+
+if ($inputFilter->isValid()) {
+    echo "The form is valid\n";
+} else {
+    echo "The form is not valid\n";
+    foreach ($inputFilter->getInvalidInput() as $error) {
+        print_r ($error->getMessages());
+    }
+}
+
+?>
+</pre>
+
+<h2>使用工厂方法</h2>
+<pre>
+<?php
+use Zend\InputFilter\Factory;
+
+$factory = new Factory();
+$inputFilter = $factory->createInputFilter(array(
+    'password' => array(
+        'name'       => 'password',
+        'required'   => true,
+        'validators' => array(
+            array(
+                'name' => 'not_empty',
+            ),
+            array(
+                'name' => 'string_length',
+                'options' => array(
+                    'min' => 8
+                ),
+            ),
+        ),
+    ),
+));
+
+$inputFilter->setData($_POST);
+echo $inputFilter->isValid() ? "Valid form" : "Invalid form";
+?>
+</pre>
+
+<h2>使用inputFilter</h2>
+
+<pre>
+<?php
+use Zend\InputFilter\InputFilter;
+
+$filter = new InputFilter();
+
+// Adding a single input
+$filter->add(array(
+    'name' => 'username',
+    'required' => true,
+    'validators' => array(
+        array(
+            'name' => 'not_empty',
+        ),
+        array(
+            'name' => 'string_length',
+            'options' => array(
+                'min' => 5
+            ),
+        ),
+    ),
+));
+
+?>
+</pre>
+
+<h2>继承InputFilterAwareInterface</h2>
+继承后在类中实例化InputFilter
+
+<pre>
+<?php
+class Album implements InputFilterAwareInterface
+{
+    public $id;
+    public $artist;
+    public $title;
+
+     protected $inputFilter;
+
+    public function setInputFilter(InputFilterInterface $inputFilter)
+    {
+        throw new \Exception("Not used");
+    }
+
+    public function getInputFilter()
+    {
+        if (!$this->inputFilter) {
+            $inputFilter = new InputFilter();
+            $inputFilter->add(array(
+                'name' => 'username',
+                'required' => true,
+                'validators' => array(
+                    array(
+                        'name' => 'not_empty',
+                    ),
+                    array(
+                        'name' => 'string_length',
+                        'options' => array(
+                            'min' => 5
+                        ),
+                    ),
+                ),
+            ));
+
+        $this->inputFilter = $inputFilter;  
+      }
+         return $this->inputFilter;
+    }
+}
+?>
+</pre>

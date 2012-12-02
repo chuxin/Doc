@@ -1,0 +1,37 @@
+在 ActionScript3 中，数组是以非负整数为索引的稀疏数组（sparse array），不支持类型化数组 （typed array）。 以非负整数为索引值来访问数组元素。
+
+在 ActionScript3 中， Array 好比一组空盒子， 盒子编号从整数 0 开始。每次 Array 初始化时，都默认给了每一个空盒子一个空值，那就是
+null。
+
+非类型化数组，意思就是我们并不限制所有盒子都要放同一种类型的数据.稀疏数组，意思就是不要求每个盒子都要装东西，比如我们可以让第 1
+个和第 9 个装东西，其他留空。
+
+每个盒子中装的都不是数据对象本身， 而是指向数据对象的引用，操作数组时一定要记住这一点，并记住操作引用。
+
+<pre>
+var a:Array;                  	   //声明一个数组变量 a，但还没有告诉 a 这个引用指向谁。trace 得到 null 
+var b:Array  =  [];               //直接声明一个空数组 b。trace 得到空白的显示，但不再是 null 了
+var c:Array = new Array();         //效果同声明 b 的方法
+var d:Array = [1,2,3,4];           //直接使用[]操作符， 建立一个含有整数 1、 2、3、4 的数组
+var e:Array = new Array(1,2,3,4)   //使用 Array 类来进行和 d 同样的操作
+var f:Array =new Array(5);        //声明一个长度为 5 的空数组，此时每个数组元素都为空
+</pre>
+
+
+与其他语言对比在 Java 和 C#中，数组都是类型化数组，即使用类型声明。因此：
+
+●  所有元素都应当是同一类型的。ActionScript3 则没有这个限制。
+●  在初始化时，数组元素可以初始化为不同的值，比如 C#中，int[]a  = new int[5]时， 所有数组元素初始为零。在 ActionScript3 中由于没有类型区分，所有元素初始化后，默认值都为 null。
+
+
+可以使用 Object 类创建关联数组。 关键是，关联数组是 Object 类的实例，而每个键/值对由属性及属性的值表示。 要将关联数组声明为 Object 数据类型还有另一个原因：您可以使用对象文本来填充关联数组（但只能在您声明它时）。 下面的示例使用对象文本创建一个关联数组，使用点运算符和数组访问运算符访问项，然后通过创建一个新属性来添加新的键/值对：
+
+<pre>
+var myAssocArray:Object = {fname:"John", lname:"Public"};
+ trace(myAssocArray.fname);     // Output: John
+ trace(myAssocArray["lname"]);  // Output: Public
+ myAssocArray.initial = "Q";
+ trace(myAssocArray.initial);   // Output: Q
+</pre>
+
+

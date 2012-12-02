@@ -1,0 +1,73 @@
+<h2>for..in</h2>
+for..in 循环访问对象属性或数组元素。例如，可以使用 for..in 循环来循环访问通用对象的属性 （不按任何特定的顺序来保存对
+象的属性，因此属性可能以看似随机的顺序出现）：
+<pre>
+var myObj:Object = {x:20, y:30}; 
+for (var i:String in myObj) 
+{ 
+trace(i + ": " + myObj[i]); 
+} 
+// output: 
+// x: 20 
+// y: 30
+</pre>
+还可以循环访问数组中的元素：
+<pre>
+var myArray:Array = ["one", "two", "three"]; 
+for (var i:String in myArray) 
+{ 
+trace(myArray[i]); 
+} 
+// output: 
+// one 
+// two 
+// three
+</pre>
+
+
+<h2>for each..in</h2>
+for each..in 循环用于循环访问集合中的项，这些项可以是XML 或XMLList 对象中的标签、对象属性保存的值或数组元素。
+
+<strong>for each..in 循环中的迭代变量包含属性所保存的值，而不包含属性的名称：</strong>
+<pre>
+var myObj:Object = {x:20, y:30}; 
+for each (var num in myObj) 
+{ 
+	trace(num); 
+} 
+</pre>
+
+<strong>您可以循环访问XML 或XMLList 对象，如下面的示例所示：</strong>
+<pre>
+var myXML:XML = <users> 
+<fname>Jane</fname> 
+<fname>Susan</fname> 
+<fname>John</fname> 
+</users>; 
+for each (var item in myXML.fname) 
+{ 
+trace(item); 
+} 
+</pre>
+
+
+<strong>循环访问数组中的元素，如下面的示例所示</strong>
+<pre>
+var myArray:Array = ["one", "two", "three"]; 
+for each (var item in myArray) 
+{ 
+trace(item); 
+} 
+// output: 
+// one 
+// two 
+// three
+</pre>
+
+
+
+<h2>为什么要设计出 for...in 和 for each...in 这样的语句？而且用它们有什么好处？</h2>
+当使用数组作为集合时， 我们可以通过索引和数组长度访问所有的成员。
+但是，如果使用 Object（对象）怎么办？
+在 Obj ect 中，成员只可以通过成员的名字字符串（即“键”）访问，并不拥有数组索引递增的规律。
+那么为了访问 Object这样的非数字索引的集合， 必须引入另外一种内建的机制， 在不知道成员的名字时，仍然可以访问到每个成员。

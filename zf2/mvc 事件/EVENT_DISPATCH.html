@@ -1,0 +1,114 @@
+注意MvcEvent::EVENT_DISPATCH有两个事件管理.
+1.一个是全局事件管理
+2.一个是Zend\Stdlib\DispatchableInterface事件管理.这个是在控制器内触发
+
+
+<h2>Mvc\DispatchListener.php</h2>
+<strong>附加在</strong>
+application.php中
+
+<strong>array($this, 'onDispatch')</strong>
+1.使用控制器加载器ControllerLoader.加载控制器.
+所有的控制器在ServiceListener注册到了该serviceManger。注意增加了addPeeringServiceManager($serviceLocator);
+所以你可以把控制器注册到ServiceLocator也能获得控制器。
+同时设置了setServiceLocator();setEventManager();setPluginManager();
+
+2.执行控制器中dispatch()函数,并触发Zend\Stdlib\DispatchableInterface的MvcEvent::EVENT_DISPATCH事件
+3.设置到mvcEvent中$event->setResult($return);
+
+
+
+
+
+
+
+关于Zend\Stdlib\DispatchableInterface中的MvcEvent::EVENT_DISPATCH主要被附加在ViewManager..注意上面的返回值是经过下面所有的事件后返回的.
+
+1.Zend\Mvc\Controller\AbstractActionController
+
+<strong>onDispatch</strong>
+
+执行action动作，
+可以返回一个数组，
+也可以返回一个null，
+也可以返回一个viewmodel。但是注意其captureTo是content。在布局中会用到。
+
+
+
+2.Zend\Mvc\View\Http\CreateViewModelListener
+<strong>array($createViewModelListener, 'createViewModelFromArray')</strong>
+如果action动作返回的值是数组,则实例化viewModel,并把数组传入
+
+
+3.Zend\Mvc\View\Http\CreateViewModelListener
+<strong>array($createViewModelListener, 'createViewModelFromNull')</strong>
+如果action动作返回的值是null,则实例化viewModel.不传入任何数据
+
+4.Zend\Mvc\View\Http\RouteNotFoundStrategy
+<strong> array($routeNotFoundStrategy, 'prepareNotFoundViewModel'),</strong>
+如果响应头是404则,更改viewModel,如果返回的值是字符窜.则实例化viewModel,设置message为字符窜.并设置404模板
+
+从这里可以看出:
+1.只要把响应头设置为404
+2.在action中返回字符窜即为message
+
+5.Zend\Mvc\View\Http\InjectTemplateListener
+<strong>array($this, 'injectTemplate')</strong>
+注入模板.检查viewModel中是否有template,没有模板的话则注入模板.
+注意由控制器动作返回的默认viewModel他的captureTo是content。所以如果要在外层加上layout的viewModel时，需要在里面输出content才能打印该视图模型。
+
+
+6.Zend\Mvc\View\Http\InjectViewModelListener
+<strong>$injectViewModelListener, 'injectViewModel')</strong>
+注入布局模板的视图模型.
+
+在整个流程,一般不会使用setViewModel()设置视图模型,所以该值为viewModel默认null.
+getViewModel则会新建viewModel.有两个地方会使用getviewModel，建立布局并设置模板
+
+1.在ViewManager中getMvcRenderingStrategy(),添加视图默认策略时，会新建viewModel，并设置配置文件中的默认布局
+<pre>
+<?php
+    public function getViewModel()
+    {
+        if ($this->viewModel) {
+            return $this->viewModel;
+        }
+
+        $this->viewModel = $model = $this->event->getViewModel();
+        $model->setTemplate($this->getLayoutTemplate());
+
+        return $this->viewModel;
+    }
+
+    public function getLayoutTemplate()
+    {
+        $layout = 'layout/layout';
+        if (isset($this->config['layout'])) {
+            $layout = $this->config['layout'];
+        }
+        return $layout;
+    }
+?>
+</pre>
+2.控制器中使用layout主动设置布局就是最外层的viewModel
+
+
+<pre>
+	<?php
+        $result = $e->getResult();
+        if (!$result instanceof ViewModel) {
+            return;
+        }
+
+        $model = $e->getViewModel();
+
+        //确定action返回的结果是否是最终viewModel.如果是的话,则设置viewModel到mvcEvent以供最后使用.
+        if ($result->terminate()) {
+            $e->setViewModel($result);
+            return;
+        }
+        //设置 action为视图模型的子视图.注意哈.这样有个好处就是可以使用layout模板
+        $model->addChild($result);
+        ?>
+</pre>
+

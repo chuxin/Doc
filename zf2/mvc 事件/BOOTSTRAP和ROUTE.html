@@ -1,0 +1,47 @@
+<h2>
+引导事件 MvcEvent::EVENT_BOOTSTRAP
+</h2>
+<ul>
+<li>
+<h2>ModuleManager\Listener\LocatorRegistrationListener.php</h2>
+1.确保服务中是否共享了module Manager管理
+<pre>
+<?php
+	$events->attach('Zend\Mvc\Application', MvcEvent::EVENT_BOOTSTRAP, function ($e) use ($moduleManager) {
+	$moduleClassName = get_class($moduleManager);
+	$application     = $e->getApplication();
+	$services        = $application->getServiceManager();
+	if (!$services->has($moduleClassName)) {
+	$services->setService($moduleClassName, $moduleManager);
+	}
+	}, 1000);
+?>
+</pre>
+2.<strong>this->onBootstrap</strong> 如果module.php实现了LocatorRegisteredInterface接口,则注册该module.php为service.使其可以用serviceManage调用该模块。
+</li>
+<li>
+	<h2>ModuleManager\Listener\OnBootstrapListener.php</h2>
+	<strong>$module->onBootstrap</strong> 如果Module.php有onBootstrap函数,则这个时候会触发 
+</li>
+<li>
+	<h2>Mvc\View\Http\ViewManager.php</h2>
+	<strong>$this->onBootstrap</strong>  
+	1.为之后的EVENT_DISPATCH和EVENT_DISPATCH_ERROR以及MvcEvent::EVENT_RENDER和MvcEvent::EVENT_FINISH的监听器附加各种和view相关的事件。(rend事件被附加在DefaultRenderingStrategy，finish事件被附加在SendResponseListener监听器中)
+	2.同时这里会把配置中的$config['view_manager']，赋给了自己的config，留作其他监听器使用和处理。
+</li>
+</ul>
+
+
+<h2>路由事件</h2>
+<ul>
+	<li>
+		<h2>Zend\Mvc\RouteListener</h2>
+		<strong>$this->onRoute</strong>匹配路由并把返回的routeMatch,设置到mvcEvent的属性中,如果匹配失败,则会触发错误分配事件
+	</li>
+	<li>
+		<h2>Mvc\ModuleRouteListener.php</h2>
+		<strong>$this->onRoute</strong>这个没有在mvc事件中使用。如果把这个添加到router事件后，会简化路由控制器设置，可以设置一个"__NAMESPACE__"作为模块。控制器只要直接设置名字就可以了。不要加上命名空间。
+
+	</li>
+</ul>
+

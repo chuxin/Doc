@@ -1,0 +1,113 @@
+AbstractTableGateway和TableGateway提供常用的方法在数据表中。
+提供了功能select() , insert() , update() , delete()
+封装了sql，adapter，resultSet。并可以为其附件各种特性
+
+<h2>AbstractTableGateway</h2>
+
+初始化该类时，会实例化Feature\FeatureSet并在实例化SQL的前后执行处理。
+<pre>
+<?php
+$this->featureSet->apply('preInitialize', array());//循环所有的feature执行其中的preInitialize
+
+$this->sql = new Sql($this->adapter, $this->table);
+
+$this->featureSet->apply('postInitialize', array());//循环所有的feature执行其中的postInitialize
+
+?>
+</pre>
+可以继承该抽象类
+<pre>
+<?php
+class MyTableGateway extends AbstractTableGateway
+{
+   public function __construct()
+   {
+           $this->table = 'my_table';
+           $this->featureSet = new Feature\FeatureSet();
+           $this->featureSet->addFeature(new Feature\GlobalAdapterFeature());
+           $this->initialize();
+   }
+}
+
+// elsewhere in code, in a bootstrap
+Zend\Db\TableGateway\Feature\GlobalAdapterFeature::setStaticAdapter($adapter);
+
+// in a controller, or model somewhere
+$table = new MyTableGateway(); // adapter is statially loaded
+?>
+</pre>
+
+<h2>TableGateway</h2>
+TableGateway只是继承了AbstractTableGateway抽象类。其实构造函数没做什么和初始化函数差不多。只是让其可以实例化
+<pre>
+<?php
+$adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+$albumTable = new TableGateway('album', $adapter);
+$rowset = $albumTable->select(array('id' => 2));
+//使用匿名函数
+$rowset = $artistTable->select(function (Select $select) {
+$select->where->like('name', 'Brit%');
+$select->order('name ASC')->limit(2);
+});
+
+print_r($rowset->current());
+?>
+</pre>
+
+
+
+
+
+<h2>Features   特性</h2>
+
+添加特性：
+<pre>
+<?php
+$TableGateway->getFeatureSet()->addFeatures(array(new Feature\MasterSlaveFeature($slaveAdapter)))
+?>
+</pre>
+
+
+GlobalAdapterFeature    全局adapter特性
+<pre>
+<?php
+Zend\Db\TableGateway\Feature\GlobalAdapterFeature::setStaticAdapter($adapter);
+?>
+</pre>
+
+MasterSlaveFeature   主从特性
+<pre>
+<?php
+$table = new TableGateway('artist', $adapter, new Feature\MasterSlaveFeature($slaveAdapter));
+?>
+</pre>
+当使用$TableGateway->select()时，会执行preSelect()和postSelect()，
+preSelect()选择前会使用从适配器
+postSelect()选择后会切换回主适配器
+
+MetadataFeature     数据表元数据特性
+<pre>
+<?php
+$table = new TableGateway('artist', $adapter, new Feature\MeatadataFeature());
+?>
+</pre>
+EventFeature       事件特性
+<pre>
+<?php
+$table = new TableGateway('artist', $adapter, new Feature\EventFeature($eventManagerInstance));
+?>
+</pre>
+
+
+RowGatewayFeature    行网关特性
+<pre>
+<?php
+$table = new TableGateway('artist', $adapter, new Feature\RowGatewayFeature('id'));
+$results = $table->select(array('id' => 2));
+
+$artistRow = $results->current();
+$artistRow->name = 'New Name';
+$artistRow->save();
+
+?>
+</pre>

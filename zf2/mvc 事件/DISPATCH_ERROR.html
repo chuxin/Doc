@@ -1,0 +1,78 @@
+<h2>Mvc\View\Http\RouteNotFoundStrategy.php</h2>
+
+<strong>附加在:</strong>
+该集合器被引用在viewManager.并被设置成服务.同时设置相关配置到该集合中
+$this->services->setService('RouteNotFoundStrategy', $this->routeNotFoundStrategy);
+所以在其他任意位置可以设置该服务.
+
+<strong>$this, 'detectNotFoundError'</strong>
+检测是否存在错误.如果存在ERROR_ROUTER_NO_MATCH错误.设置response的状态码为404
+
+<strong>$this, 'prepareNotFoundViewModel'</strong>
+创建和返回一个404视图模型
+1.检查mvcEvent的结果result是否是个响应,如果是则返回.
+2.获取mvcEvent的响应Response的状态码看是否是404,不是则返回.
+3.检查结果是否实现ViewModel,没实现则实例化ViewModel,并设置消息'Page not found.'
+4.设置视图模型模板
+5.注入视图404失败的原因
+6.注入视图的异常
+7.注入视图的控制器和控制器类
+8.将视图模型设置为mvcEvent的result.
+
+<h2>Mvc\View\Http\ExceptionStrategy.php</h2>
+
+<strong>附加在:</strong>
+该集合器被引用在viewManager.同样被设置成服务.同时设置相关配置到该集合中
+$this->services->setService('ExceptionStrategy', $this->exceptionStrategy);
+所以在其他任意位置可以设置该服务.
+
+<strong>$this->prepareExceptionViewModel</strong>
+创建一个异常viewmodel,和设置http状态码
+1.检查mvcEvent是否有错误,没有错误则返回.
+2.检查mvcEvent的结果result是否是个响应,如果是则返回.
+3.如果mvc事件错误为ERROR_ROUTER_NO_MATCH,则会返回跳出，
+4.默认错误会实例化viewModel.并设置异常错误与模板.设置response状态码为500;
+
+<h2>Mvc\View\Http\InjectViewModelListener.php</h2>
+<strong>附加在:</strong>
+该集合器被引用在viewManager.是直接附加的函数..而不是附加集合器
+
+<strong>$this->injectViewModel</strong>
+确保mvcEvent中有viewModel..这个事件和下面都是-100最后执行
+<pre lang="php">
+<?php 
+$result = $e->getResult();
+if (!$result instanceof ViewModel) {
+    return;
+}
+
+$model = $e->getViewModel();
+
+if ($result->terminate()) {
+    $e->setViewModel($result);
+    return;
+}
+$model->addChild($result);
+?>
+</pre>
+
+<h2>Mvc\View\Http\ViewManager.php</h2>
+<strong>$injectViewModelListener->injectViewModel()</strong>
+见上$injectViewModelListener->injectViewModel().优先级-100
+
+
+<hr />
+
+<h2>Mvc\View\Console\ExceptionStrategy.php</h2>
+<strong>$this->prepareExceptionViewModel</strong>
+控制台异常
+
+
+
+<h2>Mvc\View\Console\RouteNotFoundStrategy.php</h2>
+<strong>$this->handleRouteNotFoundError</strong>
+控制台没有找到路由
+
+
+<h2>Mvc\View\Console\ViewManager.php</h2>
+

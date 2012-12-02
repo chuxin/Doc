@@ -1,0 +1,93 @@
+ActionScript3 中预定义的基元数据类型一共有：
+Boolean、int、Number、String 和 uint。
+<ul>
+	<li>int 用来处理整数</li>
+	<li>Number 用来处理很长又有小数点的数字，</li>
+	<li>uint 处理很大的正整数</li>
+	<li>String 是处理文字的，称为字符串。</li>
+	<li>Boolean，又称布尔值，用来标识真假。这种类型的数据只有两个，一个是真（true），一个是假（false）。</li>
+</ul>
+
+
+<h2>Boolean 布尔值</h2>
+
+布尔值是用来表示真假的数据类型。 它只有两个值： true （真） 、 false （假） 。默认值是false
+
+
+<h2>数字：int、uint、Number </h2>
+其中 int 和 uint 是整型数值， 专门来处理整数。 Number 用来处理浮点数。
+
+int  是有符合 32 位的整型数，数值范围是从-2147483648 （负的 2 的 31 次方）到 2147483647 （正的 2 的 32 次方， 减 1） 。
+uint 是没有符合的 32 位整形数，数值范围是 0～4294967295。
+Number 类型是 64 位浮动值。它的数值范围是 1.797693133486231e+308 到 4.940656458412467e-24。“e+308”是科学记数法的表示方式，意为“乘
+以 10 的正的 308 次方”。
+
+<strong>使用数值类型的原则，用两句话概括就是：</strong>
+能用整数值时先使用 int 和 uint。整数值有正负之分时，请使用 int。只处理正整数，优先使用 uint。处理和颜色相关的数值时，使用 uint。
+碰到或可能碰到小数点时用 Number。
+
+
+<h2>字符串：String </h2>
+String 型变量。此时未定义，默认为null 
+字符串字面量是由双引号（"）或单引号（'）声明的。而 Java 则是用双引号声明字符串，用单引号声明字符。但是由于 ECMAScript 没有字符类型，所以可使用这两种表示法中的任何一种。
+
+字面量 	含义
+\n 		换行
+\t 		制表符
+\b 		空格
+\r 		回车
+\f 		换页符
+\\ 		反斜杠
+\' 		单引号
+\" 		双引号
+\0nnn 	八进制代码 nnn 表示的字符（n 是 0 到 7 中的一个八进制数字）
+\xnn 	十六进制代码 nn 表示的字符（n 是 0 到 F 中的一个十六进制数字）
+\unnnn 	十六进制代码 nnnn 表示的 Unicode 字符（n 是 0 到 F 中的一个十六进制数字）
+
+
+<pre>
+var stringSample1:String;    					//声明一个 String 型变量。此时未定义，默认为null 
+var stringSample2:String = ""; 					//声明一个空的字符串，已经定义
+var stringSample3:String = new String(); 		//用包装类来声明，与上效果相同
+var stringSample4:String = "abc";				//声明一个内容为 abc 的字符串
+var stringSample5:String = new String("abc"); 	//同上效果相同
+var stringSample6:String = 'abc';				//也可以使用单引号来声明新字符串
+</pre>
+
+<h2>Null、NaN、undefined 及各自应用对象：变量的默认值</h2>
+<pre>
+var a:int, b:uint, c:Number; 
+var d:String, e:Boolean; 
+var f:Array; 
+var g:Object; 
+var h; 
+var i:*; 
+
+trace(a);    //int 型，默认值为：0 
+trace(b);    //unit 型，默认值为：0 
+trace(c);    //Number 型，默认值为：NaN 
+trace(d);    //String 型，默认值为：null 
+trace(e);    //Boolean 型，默认值为：fal se 
+trace(f);    //Array 型，默认值：null 
+trace(g);    //Obj ect 型，默认值为：null 
+trace(h);    //未声明类型，默认值为：undefined 
+trace(i);    //未声明类型，默认值为：undefined 
+</pre>
+
+Number 的默认值没有采用像 C#  double 型的 0.0D，而是使用了 IEEE75415标准中规定的一个特殊值：NaN。
+NaN 是 Not  a  Number（不是一个数）的缩写。因此，如果忘了对一个Number 型变量初始化，那么这个变量参与的任何数学运算的结果都是NaN.
+
+<pre>
+var a:Number;       //先声明一个没有初始化的 Number 变量 a
+var b:Number = 10;  //再声明一个值为 10 的 Number 变量 b 
+var c:Number = a+b; //声明变量 c、d、e，分别将不同的 a 和 b 的数学运算结果赋值给它们
+var d:Number = b-a; 
+var e:Number = a*b; 
+var f:int = b-a;    //声明一个 int 型变量 f 和一个 uint 型变量 h 
+var h:uint = b+a;   //将不同的 a 和 b 的数学运算结果赋值给它们
+trace(c);           //输出：NaN 表示 c 也成了一个未初始化的变量
+trace(d);           //输出：NaN 
+trace(e);           //输出：NaN 
+trace(f);           //输出：0：由于 f 是 int 型，所以变成了 int 型的默值 0 
+trace(h);           //输出：0：同理 h 也是变成了 uint 型的默认值 0 
+</pre>

@@ -1,0 +1,90 @@
+<h2>数据类型</h2>
+java中的数据类型包括:基本数据类型和对象类型.
+
+<dl><dt>java程序中总共有8大基本类型:</dt><dd><dl><dt>整型(4种)</dt><dd>
+<table>
+<tbody>
+<tr>
+<td>数据类型</td>
+<td>宽度(比特)</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>byte</td>
+<td>8</td>
+<td>-128到127</td>
+</tr>
+<tr>
+<td>short</td>
+<td>16</td>
+<td>-32768到32767</td>
+</tr>
+<tr>
+<td>int</td>
+<td>32</td>
+<td>-2147483648到2147483647</td>
+</tr>
+<tr>
+<td>long</td>
+<td>64</td>
+<td>-9223372036854775808到9223372036854775807.如果要定义 long 型的整数字面量，需要在值的后面附加一个 L。1L、−9999L 和 123456789L 都是long 类型的字面量。可以使用小写字母 l，但是不要这样做，因为那样会很容易和数字 1 混淆</td>
+</tr>
+</tbody>
+</table>
+<a href="http://localhost/wordpress/wp-content/uploads/2012/11/000.png"><img class="alignnone size-full wp-image-567" title="000" src="http://localhost/wordpress/wp-content/uploads/2012/11/000.png" alt="" width="670" height="351" /></a>
+最左边的位是符号位，用一个 s 标记。当符号位为 0 时该数为正，为 1 时该数为负。负的二进制数用所谓的补码形式来表示。
+无论采用哪种进制,输出控制台上都会将其自动转化为十进制
+byte 和 short 类型的变量的确可以节省一点内存，但是除非有很多那种类型的值需要存储，否则不要使用，因为数值范围小的值不值得这么做。如果在表达式中使用byte和short值,当对表达式求值时它们会被提升为int类型.所以当需要使用整数时,int通常是最好的选择
+
+</dd></dl></dd><dd><dl><dt>浮点型(2种)</dt><dd>
+<table>
+<tbody>
+<tr>
+<td>数据类型</td>
+<td>宽度(比特)</td>
+<td>描述</td>
+</tr>
+<tr>
+<td>float</td>
+<td>32</td>
+<td>表示的值大概可以精确到小数点7位.声明变量时字面量后必须加f或者F,否则系统会认为是双精度浮点型数据</td>
+</tr>
+<tr>
+<td>double</td>
+<td>64</td>
+<td>表示的值大概可以精确到小数点17位.默认变量字面量就是double类型.亦可在后面附加d或者D</td>
+</tr>
+</tbody>
+</table>
+<a href="http://localhost/wordpress/wp-content/uploads/2012/11/float.png"><img class="alignnone size-full wp-image-582" title="float" src="http://localhost/wordpress/wp-content/uploads/2012/11/float.png" alt="" width="404" height="196" /></a>
+浮点型数据时用来表示具有小数点的实数的.实数是以指数形式存放在存储单元中的.把小数部分中小数点前的数字为0,小数点后第一位数字不为0的表示形式称为规范化的指数形式如0.314159X10<sup>1</sup>
+
+</dd></dl></dd><dd><dl><dt>char 字符型</dt><dd>Java 中的 char
+与 C 或 C++中的 char 是不同的。在 C/C++中，char 的宽度是 8 位。而在 Java 中不是这样的。
+相反，Java 使用 Unicode 表示字符。Unicode 定义了一个完全国际化的字符集，能够表示全
+部人类语言中的所有字符。Unicode 是数十种字符集的统一体，比如拉丁字符集、希腊字符
+集、阿拉伯字符集、斯拉夫语字符集、希伯来语字符集、日文字符集、韩文字符集等。为此，
+Unicode 需要 16 位宽。因此，在 Java 中 char 是 16 位类型。char 的范围为 0～65 536。没有
+负的 char 值。著名的 ASCII 标准字符集，其范围仍然是 0～127；而扩展的 8 位字符集
+ISO-Latin-1，其范围是 0～255。既然 Java 的设计初衷是允许程序员编写在世界范围内均可使
+用的程序，那么使用 Unicode 表示字符是合理的。&nbsp;
+
+字符型占两个字节,必须以单引号表示.
+
+1表示一个整数.'1'表示一个字符."1"表示一个字符窜.字符'1'只是代表一个形状为1的符号,输出时以1显示,在内存中以ASCII码形式存储.占两个字节.
+形式为:
+<a href="http://localhost/wordpress/wp-content/uploads/2012/11/aaa.png"><img class="alignnone size-full wp-image-579" title="aaa" src="http://localhost/wordpress/wp-content/uploads/2012/11/aaa.png" alt="" width="873" height="110" /></a>
+整数运算1+1等于整数2.而字符`1`+`1`并不等于整数2和字符`2`.
+
+任何超过一个字体的内容都不能被声明为字符型.
+
+<strong>在java的正式规范中,char被当作整数类型,这意味着它和int short long 以及byte位于同一分类中</strong>
+java中的字符被索引到Unicode字符集,它们可以转换成整数的16位值,也可以使用整数运算符进行操作
+<ul>
+	<li>对于可见的字符,都可以输入到单引号中,如'a','@'</li>
+	<li>对于不能直接输入的字符,可使用转义字符.'\''表示单引号,'\n'表示换行</li>
+	<li>还可以以八进制和十六进制直接输入字符值的机制.八进制'\141'表示字母a,十六进制'\u0061'表示'a'</li>
+</ul>
+<a href="http://localhost/wordpress/wp-content/uploads/2012/11/sss.png"><img class="alignnone size-full wp-image-570" title="sss" src="http://localhost/wordpress/wp-content/uploads/2012/11/sss.png" alt="" width="1030" height="486" /></a>
+
+</dd></dl></dd><dd><dl><dt>boolean 布尔型</dt><dd>boolean类型的变量的值,只能取两个值中的一个true或false.java中,字面值true不等于1,字面值false也不等于零.同时区分大小写.</dd></dl></dd></dl>

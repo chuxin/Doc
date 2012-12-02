@@ -1,0 +1,12 @@
+
+view   会触发策略器中的事件,返回视图渲染器,注入视图模型(循环处理viewModel的child),呈现模板
+
+Model	 视图模型,包含模板和变量,被注入到view中
+
+Strategy  策略器.包括呈现策略和响应策略.呈现策略返回渲染器,响应策略设置响应内容.
+
+Renderer  渲染器 ,会注入HelperPluginManager和模板解析器resolver
+
+helper   视图帮助管理
+
+resolver  解析器

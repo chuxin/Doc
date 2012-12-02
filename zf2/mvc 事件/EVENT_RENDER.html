@@ -1,0 +1,89 @@
+<h2>Mvc\View\Http\DefaultRenderingStrategy.php</h2>
+<strong>附加在:viewManager</strong>
+1.实例化view对象.然后传给默认呈现策略,并附加PhpRendererStrategy.php呈现策略viewEvent到事件管理器中
+2.设置DefaultRenderingStrategy的布局模板
+3.该监听器被设置为服务,所以在其他地方都可以访问.和设置该服务属性
+
+<strong>array($this, 'render')</strong>
+<pre>
+public function render(MvcEvent $e)
+{
+    $result = $e->getResult();
+    if ($result instanceof Response) {
+        return $result;
+    }
+
+    // Martial arguments
+    $request   = $e->getRequest();
+    $response  = $e->getResponse();
+    $viewModel = $e->getViewModel();
+    if (!$viewModel instanceof ViewModel) {
+        return;
+    }
+
+    $view = $this->view;
+    $view->setRequest($request);
+    $view->setResponse($response);
+    $view->render($viewModel);
+
+    return $response;
+}
+</pre>
+
+
+
+
+
+Zend\View的初始化,在bootstrap事件被触发时，视图部分做了一些主要的准备工作，包括：
+
+1.指定MVC专用的策略器Mvc\View\Http\DefaultRenderingStrategy,在策略器中将View注册到MvcEvent::EVENT_RENDER事件
+2.注入模板监听Zend\Mvc\View\InjectTemplateListener，最主要的作用是通过Controller和Action的名字来生成默认的视图名
+3.注入视图模型监听Zend\Mvc\View\InjectViewModelListener
+
+那么其实我们可以得出结论，Zend的Mvc中在bootstrap阶段，视图的所有准备工作都已经就绪了，并没有等到路由结束或者Controller启动。这样做的用意在于当路由失败时，仍然可以有对应的视图来呈现异常结果。
+
+
+ZF2的View由以下几个部分组成:
+
+<h2>View\View</h2>
+视图，主要接管MVC事件
+
+<h2>View\Model\viewModel</h2>  
+视图模型，包括了视图中可能用到的所有变量。自身为树形结构，一个视图模型可以包含若干子模型
+
+
+<h2>View\Strategy\PhpRendererStrategy</h2>
+viewEvent的事件聚合器,事件统筹安排视图的主要容器Placeholders，同时会将视图的最终结果放入容器，拼合为最后呈现给用户的内容
+
+
+<h2>View\Renderer\PhpRenderer</h2>
+渲染器，在决策器的辅助下，将ViewModel转换为文本输出。一个渲染器必须对应一个决策器才能工作。
+
+
+<h2>View\Resolver\AggregateResolver</h2>
+在ServiceListenerFactory中被注册到serviceManager中成为服务.
+决策器，定义模板命名与实际路径的映射关系，同时决定模板最终对应的实际文件
+<pre>
+$resolver = new ViewResolver\AggregateResolver();
+$resolver->attach($serviceLocator->get('ViewTemplateMapResolver'));
+$resolver->attach($serviceLocator->get('ViewTemplatePathStack'));
+</pre>
+
+
+<h2>Zend\View\HelperPluginManager</h2>
+在ServiceListenerFactory中被注册到serviceManager中成为服务.   
+视图助手，辅助生成HTML标签
+
+
+
+
+
+
+
+
+
+
+
+<hr />
+<h2>Mvc\View\Console\DefaultRenderingStrategy.php</h2>
+<strong>array($this, 'render')</strong>

@@ -1,0 +1,37 @@
+
+const EVENT_BOOTSTRAP      = 'bootstrap';
+const EVENT_DISPATCH       = 'dispatch';
+const EVENT_DISPATCH_ERROR = 'dispatch.error';
+const EVENT_FINISH         = 'finish';
+const EVENT_RENDER         = 'render';
+const EVENT_ROUTE          = 'route';
+
+
+<h2>application.php 中注册了三个监听器:</h2>
+
+$events->attach($serviceManager->get('RouteListener'));  
+$events->attach($serviceManager->get('DispatchListener'));
+$events->attach($serviceManager->get('ViewManager'));
+
+
+
+<h2>$events->attach(1serviceManager->get('RouteListener'));</h2>
+
+注册了唯一的route事件
+
+
+
+<h2>$events->attach(1serviceManager->get('DispatchListener'));</h2>
+
+注册了主要的dispatch事件
+
+
+
+<h2>$events->attach(1serviceManager->get('ViewManager'));</h2>
+注册了bootstrap事件。并在bootstrap事件触发时。注册了各种和视图相关的事件。
+包括：
+dispatch
+dispatch.error
+render
+finish
+

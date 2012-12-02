@@ -1,0 +1,329 @@
+<h2>Module Manager 事件</h2>
+事件触发在Zend\ModuleManager\ModuleManager
+
+<dl>
+	<dt>loadModules</dt>
+	<dd></dd>
+	<dt>loadModule.resolve</dt>
+	<dd></dd>
+	<dt>loadModule</dt>
+	<dd></dd>
+	<dt>loadModules.post</dt>
+	<dd></dd>
+</dl>
+
+<h2>Module Manager 监听器</h2>
+<dl>
+	<dt>Zend\ModuleManager\Listener\DefaultListenerAggregate</dt>
+	<dd>
+		默认的事件监听聚合器,会将ListenerOptions($configuration['module_listener_options'])对象传给其他的聚合监听器.
+		ListenerOptions会将配置文件中的module_listener_options配置使用setter方法赋值给其属性;
+	</dd>
+
+	<dt>第一种:__invoke(ModuleEvent $e)</dt>
+	<dd>
+		<dl>
+			<dt>Zend\ModuleManager\Listener\ModuleResolverListener</dt>
+			<dd><strong>EVENT_LOAD_MODULE_RESOLVE:</strong>该监听器实例化模块中的Module.php</dd>
+			<dt>Zend\ModuleManager\Listener\AutoloaderListener</dt>
+			<dd><strong>EVENT_LOAD_MODULE:</strong>Module.php 中 getAutoloaderConfig()</dd>
+			<dt>Zend\ModuleManager\Listener\InitTrigger</dt>
+			<dd><strong>EVENT_LOAD_MODULE:</strong>Module.php 中 init()</dd>
+			<dt>Zend\ModuleManager\Listener\OnBootstrapListener</dt>
+			<dd><strong>EVENT_LOAD_MODULE:</strong> 这个事件不会立即执行onBootstrap()函数,而是把事件附加到MvcEvent::EVENT_BOOTSTRAP上</dd>
+		</dl>
+	</dd>
+
+	<dt>第二种:ListenerAggregateInterface</dt>
+	<dd>
+		<dl>
+			<dt>Zend\ModuleManager\Listener\ConfigListener</dt>
+			<dd>
+				处理配置文件.其中的paths存储了路径和类型.paths=array(array('type'=>'glob_path','path'=>'../../path'))
+				<ul>
+					<li><strong>EVENT_LOAD_MODULES:</strong> onloadModulesPre模块预处理,优先级1000,将ConfigListener自身赋值给ModuleEvent</li>
+					<li><strong>EVENT_LOAD_MODULES:</strong>onLoadModulesPost,优先级-1000,
+						注意这会在EVENT_LOAD_MODULE_RESOLVE和EVENT_LOAD_MODULE之后.在post之前触发 <br />
+						1.处理config_glob_paths和config_static_paths.加载配置文件中的配置,使用Glob::glob($path, Glob::GLOB_BRACE)分离文件,然后ConfigFactory::fromFile($file)加载文件.以"文件名"为key.存储在configs属性中.
+						2.将配置中的extra_config,赋值给mergedConfig.并将configs属性中的配置循环整合到mergedConfig中
+						3.如果配置缓存启用,则更新缓存
+					</li>
+					<li><strong>EVENT_LOAD_MODULE:</strong>onLoadModule,获取模块的配置文件getConfig()附加到configs中.</li>
+				</ul>
+				控制器中获取该配置监听的方法:
+				$this->getServiceLocator()->get("ModuleManager")->getEvent()->getConfigListener()->getMergedConfig(false);
+                或者:
+                $this->getServiceLocator()->get("config");(这个和上面的没有区别不是config组件)
+                该监听器聚合,最后将模块中的配置和config/application.config.php中(glob_path和static_path)的配置整合到mergedconfig属性中.注意这里的service_manager配置是在loadModules.post(还有Module.php中的getServiceConfig()函数等配置)中被引用
+<pre lang="php">
+<?php
+Array
+(
+    [router] => Array
+        (
+            [routes] => Array
+                (
+                    [home] => Array
+                        (
+                            [type] => Zend\Mvc\Router\Http\Literal
+                            [options] => Array
+                                (
+                                    [route] => /
+                                    [defaults] => Array
+                                        (
+                                            [controller] => Application\Controller\Index
+                                            [action] => index
+                                        )
+
+                                )
+
+                        )
+
+                    [application] => Array
+                        (
+                            [type] => Literal
+                            [options] => Array
+                                (
+                                    [route] => /application
+                                    [defaults] => Array
+                                        (
+                                            [__NAMESPACE__] => Application\Controller
+                                            [controller] => Index
+                                            [action] => index
+                                        )
+
+                                )
+
+                            [may_terminate] => 1
+                            [child_routes] => Array
+                                (
+                                    [default] => Array
+                                        (
+                                            [type] => Segment
+                                            [options] => Array
+                                                (
+                                                    [route] => /[:controller[/:action]]
+                                                    [constraints] => Array
+                                                        (
+                                                            [controller] => [a-zA-Z][a-zA-Z0-9_-]*
+                                                            [action] => [a-zA-Z][a-zA-Z0-9_-]*
+                                                        )
+
+                                                    [defaults] => Array
+                                                        (
+                                                        )
+
+                                                )
+
+                                        )
+
+                                )
+
+                        )
+
+                    [album] => Array
+                        (
+                            [type] => segment
+                            [options] => Array
+                                (
+                                    [route] => [/:lang]/album[/:action][/:id]
+                                    [constraints] => Array
+                                        (
+                                            [lang] => [a-z]{2}(-[A-Z]{2}){0,1}
+                                            [action] => [a-zA-Z][a-zA-Z0-9_-]*
+                                            [id] => [0-9]+
+                                        )
+
+                                    [defaults] => Array
+                                        (
+                                            [controller] => Album\Controller\Album
+                                            [action] => index
+                                        )
+
+                                )
+
+                        )
+
+                )
+
+        )
+
+    [service_manager] => Array
+        (
+            [factories] => Array
+                (
+                    [translator] => Zend\I18n\Translator\TranslatorServiceFactory
+                    [Zend\Db\Adapter\Adapter] => Zend\Db\Adapter\AdapterServiceFactory
+                )
+
+        )
+
+    [translator] => Array
+        (
+            [locale] => en_US
+            [translation_file_patterns] => Array
+                (
+                    [0] => Array
+                        (
+                            [type] => gettext
+                            [base_dir] => E:\workspace\www\plancast\module\Application\config/../language
+                            [pattern] => %s.mo
+                        )
+
+                )
+
+        )
+
+    [controllers] => Array
+        (
+            [invokables] => Array
+                (
+                    [Application\Controller\Index] => Application\Controller\IndexController
+                    [Album\Controller\Album] => Album\Controller\AlbumController
+                )
+
+        )
+
+    [view_manager] => Array
+        (
+            [display_not_found_reason] => 1
+            [display_exceptions] => 1
+            [doctype] => HTML5
+            [not_found_template] => error/404
+            [exception_template] => error/index
+            [template_map] => Array
+                (
+                    [layout/layout] => E:\workspace\www\plancast\module\Application\config/../view/layout/layout.phtml
+                    [application/index/index] => E:\workspace\www\plancast\module\Application\config/../view/application/index/index.phtml
+                    [error/404] => E:\workspace\www\plancast\module\Application\config/../view/error/404.phtml
+                    [error/index] => E:\workspace\www\plancast\module\Application\config/../view/error/index.phtml
+                )
+
+            [template_path_stack] => Array
+                (
+                    [0] => E:\workspace\www\plancast\module\Application\config/../view
+                    [album] => E:\workspace\www\plancast\module\Album\config/../view
+                )
+
+        )
+
+    [db] => Array
+        (
+            [driver] => Pdo
+            [dsn] => mysql:dbname=test;host=localhost
+            [driver_options] => Array
+                (
+                    [1002] => SET NAMES 'UTF8'
+                )
+
+            [username] => root
+            [password] => toplfx007
+        )
+
+)
+?>
+</pre>
+			</dd>
+			<dt>Zend\ModuleManager\Listener\LocatorRegistrationListener</dt>
+			<dd>
+				<ul>
+					<li><strong>EVENT_LOAD_MODULE:</strong> 检查每个加载模块,看看它是否实现了LocatorRegistered。如果它是,将会把它添加到一个内部数组modules中。
+ 					</li>
+					<li><strong>EVENT_LOAD_MODULES:</strong>优先级-1000,也就是在loadmodule后执行. 添加两个EVENT_BOOTSTRAP事件.
+						<br />
+						1.检查serviceManger是否有模块管理service.没有的话,则添加到services中
+						2.如果没有实现LocatorRegistered的模块,则不会附加这个事件.如果modules中有这样的模块的话,则将该模块设置为服务.
+					</li>
+				</ul>
+			</dd>
+			<dt>Zend\ModuleManager\Listener\ServiceListener</dt>
+			<dd>这个类不是在DefaultListenerAggregate中定义的.而是在ServiceListenerFactory(<strong>ModuleManagerFactory</strong>中会将这个注册到servicemanger中),实例化了ServiceListener.<strong>注意,该监听器注册到了serviceManager中</strong>
+				<pre lang="php">
+<?php
+//ModuleManagerFactory中
+if (!$serviceLocator->has('ServiceListener')) {
+$serviceLocator->setFactory('ServiceListener', 'Zend\Mvc\Service\ServiceListenerFactory');
+}
+$serviceListener  = $serviceLocator->get('ServiceListener');
+//service_manager|config_key|module_class_interface|module_class_method
+//这四个service_manager  都是serviceManager的子类
+$serviceListener->addServiceManager(
+$serviceLocator,
+'service_manager',
+'Zend\ModuleManager\Feature\ServiceProviderInterface',
+'getServiceConfig'
+);
+$serviceListener->addServiceManager(
+'ControllerLoader',
+'controllers',
+'Zend\ModuleManager\Feature\ControllerProviderInterface',
+'getControllerConfig'
+);
+$serviceListener->addServiceManager(
+'ControllerPluginManager',
+'controller_plugins',
+'Zend\ModuleManager\Feature\ControllerPluginProviderInterface',
+'getControllerPluginConfig'
+);
+$serviceListener->addServiceManager(
+'ViewHelperManager',
+'view_helpers',
+'Zend\ModuleManager\Feature\ViewHelperProviderInterface',
+'getViewHelperConfig'
+);
+?>
+				</pre>	
+				<ul>
+					<li><strong>EVENT_LOAD_MODULE:</strong>	
+							检查模块Module.php是否实现了下面的接口<br/>
+							<ul>
+								<li>ServiceProviderInterface|getServiceConfig</li>
+								<li>ControllerProviderInterface|getControllerConfig</li>
+								<li>ControllerPluginProviderInterface|getControllerPluginConfig</li>
+								<li>ViewHelperProviderInterface|getViewHelperConfig</li>
+							</ul>
+							如果有的话则执行方法.这个方法可以返回数组或者ServiceConfig接口或者迭代器.保存在serviceManagers[$key]['configuration']中.
+					</li>
+					<li><strong>EVENT_LOAD_MODULES_POST:</strong>
+						检查$configListener->mergedConfig[config_key]是否存在..存在的话.则整合configuration中所有的配置.然后把配置传给各个serviceManager.创建各个service.
+						<pre lang="php">
+<?php
+//将配置传入ServiceConfig.并为每个service_manager传入该配置
+$serviceConfig = new ServiceConfig($smConfig);
+$serviceConfig->configureServiceManager($sm['service_manager']);
+?>
+						</pre>
+						service_manager都继承了AbstractPluginManager.创建这些服务管理器的时候,会增添同等addPeeringServiceManager($serviceManager);
+					</li>
+					<li>这两个事件的目的:在Module.php中,只要有getServiceConfig()这些方法,都会被添加到serviceManager中</li>
+				</ul>
+			</dd>
+		</dl>
+	</dd>
+
+	<dt>第三种:其他</dt>
+	<dd>
+		<dl>
+			<dt>ModuleAutoloader</dt>
+			<dd><strong>EVENT_LOAD_MODULES:</strong>
+				将ModuleName注册成命名空间,使Module.php能够自动加载...注意这里只加载Module.php.
+				src中的文件是通过getAutoloadConfig()加载;
+				<pre lang="php">
+<?php
+
+/**
+ * chdir(dirname(__DIR__));注意啊.记得有了这个所有会在根目录中查找下面的模块的目录
+ */
+$moduleAutoloader = new ModuleAutoloader(array('./module','./vendor'));
+$moduleAutoloader->register();
+$module = new Application\Module;
+?>
+				</pre>
+			</dd>
+
+			<dt>ModuleManager</dt>
+			<dd><strong>EVENT_LOAD_MODULES:</strong>在ServiceManagerConfig中,定义了获取service后的各种初始化.附加了onLoadModules事件</dd>
+		</dl>
+	</dd>
+
+</dl>

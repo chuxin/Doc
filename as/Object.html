@@ -1,0 +1,97 @@
+Object(对象)实在是大有来头。 它是 ActionScript3 所有数据结构的基石，是面向对象编程思想的载体。所有的数据类型，包括 Array、String 等基本类型，甚至 Function、Class 都是它的子类。
+
+Object 的成员有两种：一种是属性（Property），用来存放各种数据：一种是方法（Method），存放函数对象。
+
+声明一个新的 Object（对象）很简单，有两种方法：
+<pre>
+//1.使用构造函数
+var foo:Object = new Object(); 
+//2.使用空的大括号对作为 new Object()函数的语法快捷方式
+var bar:Object ={}; 
+</pre>
+这两种方法的效果完全相同，都是新建出一个空的 Object。使用空的大括号构造 Object 时，可以将属性写进去。不仅如此，还可以将
+方法直接写进去。
+<pre>
+//写入多个属性，属性名和属性值以“:”号隔开，属性之间以“,”号隔开
+var foo:Object = {name:"kingda",web:"www.ki ngda.org"}; 
+trace (foo.name); 
+//输出：kingda 
+//直接写入多个方法。这种形式很少用到，在这里只是告诉大家，可以这样运
+用。格式同上。
+var bar:Object = {hello:functi on(){trace ("Hello,guys!");}, 
+ok:function():String{return"that’ s ok";}}; 
+bar.hello(); 
+//输出：Hello,guys！
+trace (bar.ok()); 
+//输出：that’ s ok 
+
+</pre>
+Object  可以动态添加属性。也可以动态添加方法，
+
+<pre>
+//先初始化，即新建一个空对象，将其引用赋值给变量 kingda 
+Var kingda:Object = {}; 
+//新增一个属性 name，将字符串“黑羽”赋值给它
+kingda.name ="黑羽"; 
+//新增一个属性 gender，将数字 1 赋值给它
+kingda.gender = 1; 
+trace (kingda.name); 
+//输出：黑羽
+kingda.hello =function(){ 
+trace("Hi,ActionScript 3") 
+} 
+kingda.hello(); 
+//输出：Hi,ActionScript 3 
+
+</pre>
+
+在以上例子中， 由于我们确切地知道成员的名字，所以可以直接使用点号运算符（.）来添加或访问它们。
+但如果是在程序运行时需要访问一个成员，而这个成员的名字到了运行时才会知道，那么就需要用到数组运算符（[]）了。
+
+<pre>
+var kingda:Object = {}; 
+var now:Date = new Date(); 
+var property:String; 
+
+trace (now.getTime());			//输出当前时间距离 1970 年 1 月 1 日的毫秒数：1172715590484 
+
+
+if ( (now.getTime()%2 )== 0) { 
+	property ="name"; 
+} else { 
+	property = "name2"; 
+} 
+
+//注意：使用字符串变量 property 作为 kingda 的属性名。使用了数组运算符
+//property 的值由当前时间决定， 只有程序运行时才能决定 property 到底是 “名字”还是“name”
+kingda[property] ="黑羽";     //当前属性名：name2  当前属性值：黑羽
+//kingda.property =  "黑羽";  //当前属性名：property  当前属性值：黑羽
+
+//对 kingda 对象进行属性遍历，显示出所有的属性名和属性值
+for (var i in kingda) { 
+	trace ("当前属性名："+i+"  当前属性值：" + kingda [i]); 
+} 
+</pre>
+
+当然，你也可以直接用数组运算符加字符来访问或添加属性。一般是为了绕过编译时检查访问对象属性时，才会使用数组运算符。
+<pre>
+var a:Object = {name:"李飞翔",sex:"男"};
+
+a["classdd"]=2;
+
+trace(a.classdd);
+
+trace(a["name"]);
+</pre>
+
+
+
+
+
+<h2>早绑定和晚绑定</h2>
+
+所谓绑定（binding），即把对象的接口与对象实例结合在一起的方法。
+
+早绑定（early binding）是指在实例化对象之前定义它的属性和方法，这样编译器或解释程序就能够提前转换机器代码。在 Java 和 Visual Basic 这样的语言中，有了早绑定，就可以在开发环境中使用 IntelliSense（即给开发者提供对象中属性和方法列表的功能）。ECMAScript 不是强类型语言，所以不支持早绑定。
+
+另一方面，晚绑定（late binding）指的是编译器或解释程序在运行前，不知道对象的类型。使用晚绑定，无需检查对象的类型，只需检查对象是否支持属性和方法即可。ECMAScript 中的所有变量都采用晚绑定方法。这样就允许执行大量的对象操作，而无任何惩罚。

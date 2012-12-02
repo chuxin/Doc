@@ -1,0 +1,128 @@
+sql 可以让你进行链式操作
+<pre>
+<?php
+use Zend\Db\Sql\Sql;
+$sql = new Sql($adapter);
+$select = $sql->select(); // @return Zend\Db\Sql\Select
+$insert = $sql->insert(); // @return Zend\Db\Sql\Insert
+$update = $sql->update(); // @return Zend\Db\Sql\Update
+$delete = $sql->delete(); // @return Zend\Db\Sql\Delete
+?>
+</pre>
+
+
+<h2>select</h2>
+$sql->prepareStatementForSqlObject()预处理数据，返回的是statement
+<pre>
+<?php
+$adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+
+$sql = new Sql($adapter);
+$select = $sql->select()->from('album')->where(array('id' => 2));
+$statement = $sql->prepareStatementForSqlObject($select);//会返回statement对象
+$results = $statement->execute();
+
+print_r($results->current());
+?>
+</pre>
+$sql->getSqlStringForSqlObject()会返回sql语句
+<pre>
+<?php 
+        $adapter = $this->getServiceLocator()->get('Zend\Db\Adapter\Adapter');
+
+        $sql = new Sql($adapter);
+        $select = $sql->select()->from('album')->where(array('id' => 2));
+
+        $selectString = $sql->getSqlStringForSqlObject($select);
+        $results = $adapter->query($selectString, $adapter::QUERY_MODE_EXECUTE);
+        print_r($results->toArray());
+ ?>
+</pre>
+免from连接
+<pre>	
+<?php 
+use Zend\Db\Sql\Sql;
+$sql = new Sql($adapter, 'foo');
+$select = $sql->select();
+$select->where(array('id' => 2));
+ ?>
+</pre>
+一个总结
+<pre>
+<?php 
+    $adapter = $this->getServiceLocator()->get( 'Zend\Db\Adapter\Adapter' );
+
+    $sql = new Sql( $adapter );
+    $select = $sql->select();
+
+    $select->from( array( 'f' => 'foo' ) )  
+    ->join(array( 'b' => 'bar' ), 'f.foo_id = b.foo_id',array('aaa','bbb'));       
+    $select->columns( array( 'foo' => 'bar', 'baz') );
+    $select->order( 'id DESC' ) ->order( 'name ASC, age DESC' );
+    $select->limit( 5 );
+    $select->offset( 10 );
+
+    $selectString = $sql->getSqlStringForSqlObject( $select );
+ ?>
+</pre>
+
+SELECT `f`.`bar` AS `foo`, `f`.`baz` AS `baz`, `b`.`aaa` AS `aaa`, `b`.`bbb` AS `bbb` 
+FROM `foo` AS `f` INNER JOIN `bar` AS `b` ON `f`.`foo_id` = `b`.`foo_id` 
+ORDER BY `id` DESC, `name` ASC, `age` DESC LIMIT 5 OFFSET 10 
+
+
+
+<h2>insert</h2>
+
+<pre>
+<?php 
+    $adapter = $this->getServiceLocator()->get( 'Zend\Db\Adapter\Adapter' );
+
+    $sql = new Sql( $adapter );
+    $insert = $sql->insert("album");
+
+    $insert->columns(array('artist', 'title')); 
+    $insert->values(array(
+         'artist' => 'value1',
+         'title' => 'value2'
+    ));
+    
+    $insertString = $sql->getSqlStringForSqlObject( $insert );
+    echo $insertString;
+ ?>
+</pre>
+
+
+<h2>update</h2>
+<pre>
+<?php 
+	$adapter = $this->getServiceLocator()->get( 'Zend\Db\Adapter\Adapter' );
+
+	$sql = new Sql( $adapter );
+	$update = $sql->update("album");
+
+	$update->set(array('foo' => 'bar', 'baz' => 'bax'));
+	$update->where("id = 10");
+
+	$updateString = $sql->getSqlStringForSqlObject( $update );
+	echo $updateString;
+?>
+</pre>
+UPDATE `album` SET `foo` = 'bar', `baz` = 'bax' WHERE id = 10 
+
+<h2>delete</h2>
+<pre>
+<?php
+        $adapter = $this->getServiceLocator()->get( 'Zend\Db\Adapter\Adapter' );
+
+        $sql = new Sql( $adapter );
+        $delete = $sql->delete("album");
+
+        $delete->where("id = 10");
+
+        $deleteString = $sql->getSqlStringForSqlObject( $delete );
+        echo $deleteString;
+?>
+</pre>
+
+DELETE FROM `album` WHERE id = 10 

@@ -1,0 +1,148 @@
+application.config.php
+<pre>
+<?php
+retrun array(
+	"service_manager"=>array(), //Application::init()
+	"modules"=>array(),//Zend\Mvc\Service\ModuleManagerFactory
+	"service_listener_options"=>array(//Zend\Mvc\Service\ServiceListenerFactory  添加serviceManger
+  		'aaaa'=>array(
+         'service_manager'=>'',
+         'config_key'=>'',
+         'interface'=>'',
+         'method'=>'',
+  		)
+	),
+	"module_listener_options"=>array(  	//Zend\Mvc\Service\ModuleManagerFactory被注册到ListenerOptions
+		'module_paths'=>array(),     	//Zend\ModuleManager\Listener\DefaultListenerAggregate
+		'config_glob_paths'=>array(), 	//Zend\ModuleManager\Listener\ConfigListener
+		'config_static_paths'=>array(),	//Zend\ModuleManager\Listener\ConfigListener
+		'extra_config'=>array(),		//Zend\ModuleManager\Listener\ConfigListener
+		'config_cache_enabled'=>array(),//Zend\ModuleManager\Listener\ConfigListener
+		'cache_dir'=>'',
+		'config_cache_key'=>array(),
+	),
+);
+?>
+</pre>
+Module.php 下面用到的监听聚合器在Zend\ModuleManager\Listener\下面。实现的接口都在Zend\ModuleManager\Feature\
+
+1.使用getAutoloaderConfig()方法 	要求实现AutoloaderProviderInterface方法 位于AutoloaderListener
+2.使用init($ModuleManager);     	要求实现InitProviderInterface           位于InitTrigger
+3.使用onBootstrap()方法         	要求实现BootstrapListenerInterface      位于OnBootstrapListener
+4.使用getConfig方法 				要求实现ConfigProviderInterface。		位于ConfigListener中
+5.注册为service，   				要求实现LocatorRegisteredInterface  	位于LocatorRegistrationListener
+下面的四个都是返回serviceConfig的格式。为各个serviceManager提供配置文件。亦可在module.config.php提供
+6.使用getServiceConfig()        	要求实现ServiceProviderInterface      		位于ServiceListener
+7.使用getControllerConfig()     	要求实现ControllerProviderInterface      	位于ServiceListener
+8.使用getControllerPluginConfig()	要求实现ControllerPluginProviderInterface	位于ServiceListener
+9.使用getViewHelperConfig()  		要求实现ViewHelperProviderInterface      	位于ServiceListener
+
+module.config.php
+<pre>
+<?php
+return array(
+"navigation"=>array(),// Zend\Navigation\Service\AbstractNavigationFactory
+"view_manager"=>array(
+	'base_path'=>'',//Zend\Mvc\ServiceViewHelperManagerFactory 默认是'Request'->getBasePath();
+	"layout"=>'layout/layout',//Zend\Mvc\View\Http\ViewManager
+	"display_exceptions"=>false,//Zend\Mvc\View\Http\ViewManager
+	'exception_template'=>'error',//Zend\Mvc\View\Http\ViewManager
+	'displayNotFoundReason'=>false,//Zend\Mvc\View\Http\ViewManager
+	'not_found_template'=>'404'//Zend\Mvc\View\Http\ViewManager
+  "template_map"=>array(),  //Zend\Mvc\Service\ViewTemplateMapResolverFactory
+  //Zend\Mvc\Service\ViewTemplatePathStackFactory 。模板查找路径注意应用配置中模板路径越靠后的模板越优先。
+  //modules=>array('album','applictaion');   application中的模板比album的优先级高
+  "template_path_stack"=>array(),
+),
+
+//Zend\Mvc\ServiceDiFactory和Zend\Mvc\Service\ControllerLoaderFactory
+//和Zend\Mvc\Service\AbstractPluginManagerFactory
+"di"=>array(),
+"doctype"=>array(),//Zend\Mvc\Service\AbstractPluginManagerFactory
+"router"=>array(     //Zend\Mvc\Service\RouterFactory   详细内容待查
+	'route_plugins'=>,//Zend\Mvc\Router\SimpleRouteStack
+	"routes"=>array(//Zend\Mvc\Router\SimpleRouteStack
+		),
+	"default_params"=>array(//Zend\Mvc\Router\SimpleRouteStack
+
+		),
+),
+"db"=>  ,         //Zend\Db\Adapter/AdapterServiceFactory
+"translator"=> ,  //Zend\I18n\Translator\TranslatorServiceFactory
+"mvc_strategies"=>'',//Zend\Mvc\View\Http\ViewManager,mvc呈现策略，配置是个监听器数组，优先级100。可以再mvc引导事件中注册
+"strategies"=>'',//Zend\Mvc\View\Http\ViewManager，同上 注册视图策略
+
+)?>	
+
+</pre>
+
+service配置：
+Zend\ModuleManager\Listener\ServiceListener
+为各个serviceManager注册service配置。
+
+ServiceListener::addServiceManager(),会规范serviceManager。
+<?php
+ $this->serviceManagers[$smKey] = array(
+            'service_manager'        => $serviceManager,
+            'config_key'             => $key,
+            'module_class_interface' => $moduleInterface,
+            'module_class_method'    => $method,
+            'configuration'          => array(),
+);
+?>
+</pre>
+各个serviceManager的配置来自两个地方：
+1.所有module.config.php通过config_key返回service配置。
+  被注册到$serviceManager['configuration']['merged_config']
+2.在Module.php实现module_class_interface。并提供module_class_method返回service配置
+  被注册到$serviceManager['configuration'][模块名::$module_class_method()]
+
+返回值：
+用方法返回的配置可以直接返回一个serviceConfig实例。
+
+若上面两个配置返回数组的话可以设置为：
+<?php
+array(
+'configuration_classes'=>array(//实现了ServiceConfig的类
+				'ServiceConfig'    
+	)		
+)
+?>
+$this->onLoadModulesPost()会把上面的configuration循环并设置serviceConfig。
+
+注意虽然是多个serviceManger。但是相互没有多少关系。
+1.其他serviceManger都继承了AbstractPluginManager，
+2.其他serviceManger都被$serviceLocator中在文件ServiceListenerFactory里面注册成了service。
+3.除非在各个serviceManager中使用$serviceManager->addPeeringServiceManager($serviceLocator);才能造成联系
+
+Zend\Mvc\Service\ModuleManagerFactory中的各个serviceManger
+<pre>
+<?php
+        $serviceListener->addServiceManager(
+            $serviceLocator,
+            'service_manager',
+            'Zend\ModuleManager\Feature\ServiceProviderInterface',
+            'getServiceConfig'
+        );
+        $serviceListener->addServiceManager(
+            'ControllerLoader',
+            'controllers',
+            'Zend\ModuleManager\Feature\ControllerProviderInterface',
+            'getControllerConfig'
+        );
+        $serviceListener->addServiceManager(
+            'ControllerPluginManager',
+            'controller_plugins',
+            'Zend\ModuleManager\Feature\ControllerPluginProviderInterface',
+            'getControllerPluginConfig'
+        );
+        $serviceListener->addServiceManager(
+            'ViewHelperManager',
+            'view_helpers',
+            'Zend\ModuleManager\Feature\ViewHelperProviderInterface',
+            'getViewHelperConfig'
+        );
+?>
+</pre>
+
+

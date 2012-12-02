@@ -1,0 +1,331 @@
+Go是编译型语言，而不是解释型的。Go的编译速度非常快– 甚至远远快过其他同类语言- 知名的如C和C++。
+
+<h2>Go安装</h2>
+要下载和安装Go，请访问golang.org/doc/install.html
+<ul>
+    <li>$GOROOT Go安装包的根目录。通常是放在$HOME/go，当然也可以是其他位置。</li>
+    <li>
+        PATH变量中应该包含$GOROOT/bin或%GOROOT%\bin;
+        <pre>
+E:\workspace\Python\;
+E:\Soft\GCC\bin;
+E:\Editor\vimphp\vim73;
+C:\Program Files\Java\jdk1.7.0_09\bin;
+E:\workspace\xampp\php;
+E:\workspace\go\bin;
+E:\Soft\cygwin\bin;
+C:\Program Files (x86)\Git\bin;
+C:\Program Files\TortoiseGit\bin
+        </pre>
+    </li>
+    <li>$GOOS表示目标代码的操作系统 $GOOS选项有linux、 freebsd、darwin (Mac OS X 10.5 or 10.6) 和 nacl windows</li>
+    <li>$GOARCH 表示目标代码的CPU类型 我们C:gopkg目录下有个文件夹名字叫 mingw_386，它的破折号前面就是mingw 。而如果我们下载第二个地址的GO语言时，C:gopkg目录下那个文件夹名字变成了windows_386，GOOS要找这个文件夹，所以我们要根 据情况进行变动，你如不变，编译程序就会找不到库而报错</li>
+    <li>GOBIN 指明用于存放go的二进制程序目录。如果是没设置$GOBIN环境变量， 则默认是安装在$HOME/bin。如果设置了该变量，需要确保$PATH 变量也包含这个路径，这样编译器可以找到正确的执行文件。</li>
+</ul>
+
+为了检查Go安装地是否正确，可在控制台下输入 下面命令：
+$ go version
+$ go env 打印运行环境
+
+
+<h2>Go文档</h2>
+"Packages"链接提供了有关所有Go标准库包的访问方式- 以及它们的源码，这些源码在文档还很稀缺时十分有用
+"Commands"链接你可以找到与Go一起发布的相关程序的文档(诸如编译器，构建工具 等)。
+"Specification"链接，你可以找到一份非正式，但很全面的Go语言规范
+"Effective Go"链接，你可以找到一份介绍Go最佳实践的文档。
+
+Go站点上 的搜索框只能用于在Go文档中搜索；
+如果要对Go的资源进行全面搜索，请访问http://go-lang.cat-v.org/go-search。
+
+
+Go的文档也可以在本地浏览:
+ godoc -http=:8000
+端口号可以是任意的- 如果它与一个已存在的服务器端口冲突，可以使用其他任一个端口号。查看文档，打开一个浏览器，输入地址http://localhost:8000
+"Package"链接将指向Go标准库以及安装在GOROOT环境变量下的第三方包的文档。
+如果你定义了GOPATH环境变量(比如，为本 地程序和包)，一个链接将会出现在"Packages"链接旁，通过这个链接你可以访问其他相关文档。
+
+
+其他学习文档:
+http://www.mikespook.com/learning-go
+https://github.com/astaxie/build-web-application-with-golang
+
+<h2>Go的包</h2>
+
+Go保持了与C家族语言一致的风格：即目标为可执行程序的Go源码中务必要有一个名为main的函数，该函数即为可执行程序的入口点。除此之外 Go还增加了一个约束：作为入口点的main函数必须在名为main的package中。正如上面hellogo.go源文件中的那样，在源码第 一行就声明了该文件所归属的package为main。main包的main()函数总是具有相同的函数签名 – 没有参数、没有返回值。当main.main()结束时，程序将终止并返回0给操作系统。当然，我们可以在任意时刻返回并选择我们自己的返回值
+
+Go去除了头文件的概念，而借鉴了很多主流语言都采用的package的源码组织方式。package是个逻辑概念，与文件没有一一对应的关系。 如果多个源文件都在开头声明自己属于某个名为foo的包，那这些源文件中的代码在逻辑上都归属于包foo(这些文件最好在同一个目录下，至少目前 的Go版本还无法支持不同目录下的源文件归属于同一个包)。
+
+在C中，我们通过static来标识局部函数还是全局函数。而在Go中，包中的函数是否可以被外部调用，要看该函数名的首母是否为大写。这是一种 Go语言固化的约定：首母大写的函数被认为是导出的函数，可以被包之外的代码调用；而小写字母开头的函数则仅能在包内使用。在例子中你也看到了 fmt包的Printf函数其首母就是大写的。
+
+Go的操作是以包为单位的，而不是文件。这意味着我们可以根据需要任意地将一个包拆分到多个文件中。如果多个文件具有相同的包声明，Go语言认为 这些文件都是同一个包的组成部分，与所有内容在单一文件中无异。当然，我们也可以将应用的功能分解到许多本地包中，这样可以保持代码整洁地模块 化。
+
+import语句从标准库导入三个包。fmt包提供格式化文本以及读取格式化文本的函数；os包提供平台无关的操作系统变量以及函 数；strings包提供操作字符串的函数。
+
+
+<h2>GOPATH</h2>
+构建一个Go程序需要两步：编译和链接。(由于我们假设使用gc编译器，使用gccgo编译器的读者需要遵循golang.org/doc /gccgo_install.html中描述的编译和链接过程，同样，使用其他编译器的读者需要根据其编译器的指令进行编译和链接)
+
+编译和链 接过程都由工具go处理，它不仅可以构建本地程序和包，还能够获取、构建以及安装第三方程序和包。
+
+go build -o myfirstgo hellogo.go  编译成指定目标文件名
+go build  后面不带文件名，我们将得到一个与目录名同名的可执行文件
+
+要想go能够编译本地程序和包，有三个要求:
+<ul>
+    <li>Go的bin目录($GOROOT/bin或%GOROOT%\bin)必须在PATH环境变 量下</li>
+    <li>必须存在一个目录，该目录下包含一个src目录，本地程序和包的源码就驻留在src目录下</li>
+    <li>包含src的那个目录必须在GOPATH环境变量中设置</li>
+</ul>
+
+
+我们看这两个文件：main.go和hello.go。
+<pre>
+/* hello.go */
+package hello
+
+import "fmt"
+
+func Hello(who string) {
+    fmt.Printf("Hello, %s!\n", who)
+}
+
+/* main.go */
+package main
+
+import (
+    "hello"
+)
+
+func main() {
+    hello.Hello("Go!")
+}
+</pre>
+
+用go build编译main.go，结果如下：
+<pre>
+$ go build main.go
+main.go:4:2: import "hello": cannot find package
+</pre>
+我们可以使用go help gopath来查看一下有关gopath的manual。
+
+Go compiler的package搜索顺序是这样的，以搜索hello这个package为例：
+<ul>
+	<li>首先，Go compiler会在GO安装目录(GOROOT，这里是/usr/local/go)下查找是否有src/pkg/hello相关包源码；如果没有则继续；</li>
+	<li>如果export GOPATH=PATH1:PAHT2，则Go compiler会依次查找是否存在PATH1/src/hello、PATH2/src/hello；配置在GOPATH中的PATH1和PATH2被称作workplace；</li>
+</ul>
+ 如果在上述几个位置均无法找到hello这个package，则提示出错
+
+ 在本例子中，我们尚未设置过GOPATH环境变量，也没有建立类似PATH1/src/hello这样的路径，因此Go compiler显然无法找到hello这个package了。我们来设置一下GOPATH变量并建立相关目录：
+
+<pre>
+$ export GOPATH=/home/tonybai/go-examples
+$ mkdir src/hello
+$ mv hello.go src/hello
+$ go build main.go
+</pre>
+
+<h2>Go install</h2>
+go install命令除了做了go build所做的事情之外，还将可执行文件放在标准位置($GOPATH/bin或%GOPATH%\bin)。这意味着将一个单一路径($GOPATH /bin或%GOPATH>%\bin)加入到PATH环境变量中，我们安装的所有Go程序就可以方便地被加入到PATH中。
+
+我们将main.go移到src/main中，这样这个demo project显得更加合理，所有源码均在src下：
+<pre>
+`-- src
+    |-- hello
+    |   `-- hello.go
+    `-- main
+        `-- main.go
+</pre>
+Go提供了install命令，与build命令相比，install命令在编译源码后还会将可执行文件或库文件安装到约定的目录下。我们以main目录为例：
+<pre>
+$ cd main
+$ go install
+</pre>
+
+install命令执行后，我们发现main目录下没有任何变化，原先build时产生的main可执行文件也不见了踪影。别急，前面说过Go install也有一套自己的约定：
+* go install(在src/DIR下)编译出的可执行文件以其所在目录名(DIR)命名
+* go install将可执行文件安装到与src同级别的bin目录下，bin目录由go install自动创建
+* go install将可执行文件依赖的各种package编译后，放在与src同级别的pkg目录下
+<pre>
+.
+|-- bin
+|   `-- main.exe
+|-- pkg
+|   `-- windows_amd64
+|       `-- hello.a
+`-- src
+    |-- hello
+    |   `-- hello.go
+    `-- main
+        `-- main.go
+</pre>
+
+hello.go编译后并非可执行程序，在编译main的同时，由于main依赖hello package，因此hello也被关联编译了。这与单独在hello目录下执行install的结果是一样的，我们试试：
+<pre>
+$ cd hello
+$ go install
+$ ls /home/tonybai/go-examples
+bin/  pkg/  src/
+</pre>
+
+在我们的workspace(godev目录)下出现了一个pkg目录，pkg目录下是一个名为linux_386的子目录，其下面有一个文件：hello.a。这就是我们install的结果。hello.go被编译为hello.a并安装到pkg/linux_386目录下了。
+
+.a这个后缀名让我们想起了静态共享库，但这里的.a却是Go独有的文件格式，与传统的静态共享库并不兼容。但Go语言的设计者使用这个后缀名似乎是希望 这个.a文件也承担起Go语言中"静态共享库"的角色。我们不妨来试试，看看这个hello.a是否可以被Go compiler当作"静态共享库"来对待。我们移除src中的hello目录，然后在main目录下执行go build：
+<pre>
+$ go build
+main.go:4:2: import "hello": cannot find package
+</pre>
+
+Go编译器提示无法找到hello这个包，可见目前版本的Go编译器似乎不理pkg下的.a文件。http://code.google.com/p/go/issues/detail?id=2775 这个issue也印证了这一点，不过后续Go版本很可能会支持链接.a文件。毕竟我们在使用第三方package的时候，很可能无法得到其源码，并且在每个项目中都保存一份第三方包的源码也十分不利于项目源码的后期维护
+
+
+<h2>go run</h2>
+Go具有很高的编译效率，这得益于其设计者对该目标的重视以及设计过程中细节方面的把控，当然这不是本文要关注的话题。正是由于go具有极速的编译，我们才可以像使用运行脚本语言那样使用它。
+
+目前Go提供了run命令来直接运行源文件。比如：
+<pre>
+$ go run main.go
+Hello, Go!
+</pre>
+go run实际上是一个将编译源码和运行编译后的二进制程序结合在一起的命令。但目前go源文件尚不支持作成Shebang Script，因为Go compiler尚不识别#!符号，下面的源码文件运行起来会出错：
+<pre>
+#! /usr/local/go/bin/go run
+
+package main
+
+import (
+    "hello"
+)
+
+func main() {
+    hello.Hello("Go!")
+}
+
+$ go run main.go
+package :
+main.go:1:1: illegal character U+0023 '#'
+</pre>
+
+不过我们可以可借助一些第三方工具来运行Shebang Go scripts，比如<a href="https://wiki.ubuntu.com/gorun">gorun</a>。
+
+<h2>go单元测试</h2>
+我们用一个例子来说明如何编写包的测试代码以及如何运行这个测试。我们在go-examples/src下建立另外一个目录mymath，mymath目录下mymath包的代码如下：
+<pre>
+/* mymath.go */
+package mymath
+
+func MyAdd(i int, j int) int {
+    return i + j
+}
+</pre>
+
+要对mymath包进行测试，我们需在同一目录下创建mymath_test.go文件，其中对MyAdd函数的测试代码如下：
+<pre>
+/* mymath_test.go */
+package mymath
+
+import "testing"
+
+func TestMyAdd(t *testing.T) {
+    a, b := 4, 2
+    if x := MyAdd(a, b); x != 6 {
+        t.Errorf("MyAdd(%d, %d) = %d, want %d", a, b, x, 6)
+    }
+}
+</pre>
+
+
+在这个文件中我们import了Go提供的标准单元测试包-testing，并且每个测试方法都已Test作为前缀开头。现在我们来运行一下这个测试，在mymath目录下运行go test命令：
+<pre>
+$ go test
+PASS
+ok      mymath    0.007s
+</pre>
+如果用例出错，我们就可看到下面提示：
+<pre>
+$go test
+— FAIL: TestMyAdd (0.00 seconds)
+    mymath_test.go:8: MyAdd(4, 2) = 6, want 6
+FAIL
+exit status 1
+FAIL    mymath    0.007s
+
+</pre>
+由上可以看出，Go test也有自己的一些约定：测试源文件的名字必须以_test.go作为结尾；测试代码与被测代码在同一个包中；测试代码要导入testing包；测试 函数要以Test作为前缀，并且测试函数的函数签名必须是这样的：func TestXXX(t *testing.T)。
+
+语言自带对测试的支持的好处是一致性，避免了大家使用不同的测试框架而给阅读、交流和维护带来的不便。
+
+<h2>项目源码组织</h2>
+有了源码、有了对编译原理的理解、有了测试框架的支持，我们就可以策划项目源码组织形式了。不过Go的诸多约定基本上已经将我们限制在如下结构上：
+<pre>
+proj1/
+    bin/
+        myapp1*
+    pkg/
+        linux_386/
+            lib1.a
+            lib2.a
+    src/
+        lib1/
+            lib1.go     
+            lib1_test.go
+        lib2/
+            lib2.go     
+            lib2_test.go
+        … …
+        myapp1/
+            main.go       # main package source
+            main_test.go  # test source
+
+proj2/
+    bin/
+        myapp2*
+    pkg/
+        linux_386/
+            lib3.a
+            lib4.a
+    src/
+        lib3/
+            lib3.go     
+            lib3_test.go
+        lib4/
+            lib4.go     
+            lib4_test.go
+        … …
+        myapp2/
+            main.go       # main package source
+            main_test.go  # test source
+</pre>
+
+基于上述结构，我们可将GOPATH设置为proj1_path:proj2_path。
+
+
+<h2>代码风格</h2>
+Go程序员可以不再纠结于到底使用哪种代码风格，因为Go已经将代码风格做了严格的约定，一旦违反，Compiler直接给出Error。go还提供了fmt命令来协助Go程序员按标准格式化源文件。
+
+从上面例子中我们可以看到Go的几大风格特点是：
+
+* 左大括号'{'一定在函数名或if等语句在同一行
+<pre>
+   func foo {
+
+   }
+</pre>
+
+
+* 无需显式用分号;将语句分隔(除非是在一行写上多条语句)，因为compiler会替大家在适当位置加入分号的。
+<pre>
+   i, j := 2, 3
+   MyAdd(i, j)
+
+   if x := MyAdd(a, b); x != 6 {
+            … …
+   }
+</pre>
+
+
+* if、for等后面的表达式无需用小括号括上
+<pre>
+   if x != 5 {
+            … …
+   }
+</pre>

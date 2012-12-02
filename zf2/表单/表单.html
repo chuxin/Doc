@@ -1,0 +1,80 @@
+<ul>
+	<li>Element 一个name和attributes，还有message</li>
+	<li>Fieldsets  从Elements扩展，可以由其他的Fieldsets和element组合，其呈现样式是FormCollection</li>
+	<li>Forms 从Fieldsets和Elements扩展，同样Fieldsets和element组合，由数据绑定是通过 ZendStdlibHydrator</li>
+</ul>
+
+
+<pre>
+<?php 
+class Element implements ElementInterface  //
+class Fieldset extends Element implements FieldsetInterface
+class Form extends Fieldset implements FormInterface
+?>	
+</pre>
+
+创建表单有三种方式：
+1.新建各种元素和表单，然后把元素向表单添加
+<pre>
+<?php
+$name = new Element('name');
+$name->setLabel('Your name');
+
+$csrf = new Element\Csrf('security');
+
+$send = new Element('send');
+$send->setValue('Submit');
+$send->setAttributes(array(
+    'type'  => 'submit'
+));
+
+
+$form = new Form('contact');
+$form->add($name);
+$form->add($csrf);
+$form->add($send);
+
+$nameInput = new Input('name');
+
+$inputFilter = new InputFilter();
+
+$form->setInputFilter($inputFilter);
+
+//添加表单段
+$sender = new Fieldset('sender');
+$sender->add($name);
+$sender->add($send);
+
+$form = new Form('contact');
+$form->add($sender);
+
+?>
+</pre>
+2.使用工厂方法
+<pre>
+<?php
+$factory = new Factory();
+$form    = $factory->createForm(array(
+    'hydrator' => 'Zend\Stdlib\Hydrator\ArraySerializable',
+    'elements' => array(
+        array(
+            'spec' => array(
+                'name' => 'name',
+                'options' => array(
+                    'label' => 'Your name',
+                ),
+                'attributes' => array(
+                    'type'  => 'text'
+                ),
+            )
+        ),
+    ),
+    'fieldsets' => array(
+    ),
+    'input_filter' => array(
+    ),
+ ),
+?>
+</pre>
+3.扩展form表单
+可在__construct()中添加元素，或是自定义其他方法添加元素
