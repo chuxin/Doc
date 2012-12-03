@@ -26,16 +26,16 @@ retrun array(
 </pre>
 Module.php 下面用到的监听聚合器在Zend\ModuleManager\Listener\下面。实现的接口都在Zend\ModuleManager\Feature\
 
-1.使用getAutoloaderConfig()方法 	要求实现AutoloaderProviderInterface方法 位于AutoloaderListener
-2.使用init($ModuleManager);     	要求实现InitProviderInterface           位于InitTrigger
-3.使用onBootstrap()方法         	要求实现BootstrapListenerInterface      位于OnBootstrapListener
-4.使用getConfig方法 				要求实现ConfigProviderInterface。		位于ConfigListener中
-5.注册为service，   				要求实现LocatorRegisteredInterface  	位于LocatorRegistrationListener
-下面的四个都是返回serviceConfig的格式。为各个serviceManager提供配置文件。亦可在module.config.php提供
-6.使用getServiceConfig()        	要求实现ServiceProviderInterface      		位于ServiceListener
-7.使用getControllerConfig()     	要求实现ControllerProviderInterface      	位于ServiceListener
-8.使用getControllerPluginConfig()	要求实现ControllerPluginProviderInterface	位于ServiceListener
-9.使用getViewHelperConfig()  		要求实现ViewHelperProviderInterface      	位于ServiceListener
+1.使用getAutoloaderConfig()方法 	可实现AutoloaderProviderInterface方法 位于AutoloaderListener
+2.使用init($ModuleManager);     	可实现InitProviderInterface           位于InitTrigger
+3.使用onBootstrap()方法         	可实现BootstrapListenerInterface      位于OnBootstrapListener
+4.使用getConfig方法 				      可实现ConfigProviderInterface。		    位于ConfigListener中
+5.注册为service，   				      必须实现LocatorRegisteredInterface  	位于LocatorRegistrationListener
+Zend\ModuleManager\Listener\ServiceListener提供,下面的四个都是返回serviceConfig的格式。为各个serviceManager提供配置文件。亦可在module.config.php
+6.使用getServiceConfig()    注册service配置   	可实现ServiceProviderInterface      		位于ServiceListener
+7.使用getControllerConfig()   注册控制器配置  	可实现ControllerProviderInterface      	位于ServiceListener
+8.使用getControllerPluginConfig()	注册控制器插件配置  可实现ControllerPluginProviderInterface	位于ServiceListener
+9.使用getViewHelperConfig()  		 注册视图插件配置 可实现ViewHelperProviderInterface      	位于ServiceListener
 
 module.config.php
 <pre>
