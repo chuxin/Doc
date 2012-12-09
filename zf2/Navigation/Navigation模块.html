@@ -1,0 +1,68 @@
+Navigation用来创建menus, breadcrumbs, links, and sitemaps
+
+
+
+
+<h2>Containers</h2>
+Zend\Navigation\AbstractContainer一个页面的容器类，它有 添加、删除和检索,迭代页面方法
+
+Zend\Navigation\Navigation。只有一个构造函数，在构造函数中增加pages数组
+
+<h2>pages</h2>
+Zend\Navigation\page\AbstractPage 该对象继承于AbstractContainer意味着一个页面可以有子页面。 该对象指向一个web页面 。其中properties属性可以让你自定义链接的属性。。所有pages返回都是数组。
+每个page都有各种link的属性（rel traget href label）等等
+
+
+MVC pages  使用类Zend\Navigation\Page\Mvc.使用mvc参数(action, controller, route, params）
+Uri pages  使用类  Zend\Navigation\Page\Uri  定义一个属性url
+
+
+所有的page类必须扩展Zend\Navigation\Page\AbstractPage，因此有一个相同的初始化方法和共同的属性。
+有四个魔术方法：__set($name, $value), __get($name), __isset($name)和 __unset($name)
+
+
+
+Navigation默认会调用Page\AbstractPage然后根据参数判断是调用mvcpage 还是uripage。
+注意mvcpage中的router必须设置。所以要自己设置。。
+mvc有四个参数：route，controller，action，params。最后getHref中，会将controller和action附加到params数组中。
+所以所有参数亦可添加到params中。
+<pre>
+<?php 
+      $nav = array(
+            'home' => array(
+                'label' => 'GDFG',
+                'route' => 'home',
+            ),
+            'news' => array(
+                'label' => 'News',
+                'controller' => 'news',
+                'action' => 'news',
+                'route' => 'default',
+                'params'=>array('__NAMESPACE__'=>'ssssss'),
+                'pages' => array(
+                    'add' => array(
+                        'label' => 'Add news',
+                        'controller' => 'news', /* or create a seperate route insteed */
+                        'action' => 'add',
+                        'route' => 'default',
+                    ),
+                ),
+            ),
+            'aaa'=>array(
+              'label'=>'中文',
+                'uri'=>'http://www.baidu.com',
+            ),
+        );
+        $mvcPage = new \Zend\Navigation\Navigation($nav);
+        $router =  $this->getServiceLocator()->get('Router');
+        //必须设置路由，才能使用mvc
+        \Zend\Navigation\Page\Mvc::setDefaultRouter($router);
+
+       $viewModel = new \Zend\View\Model\ViewModel(array('nav' => $mvcPage));
+ ?>
+</pre>
+
+
+
+
+mvc中的isActive

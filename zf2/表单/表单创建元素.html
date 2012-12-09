@@ -1,0 +1,234 @@
+表单默认是如何创建元素的?
+
+使用Form::add():
+1.默认是实例化Zend\Form\Element.除非指定type=>'Fieldset',并把各个配置setXxx()进去的.返回$elementOrFieldset
+2.如果继承于FieldsetInterface,则会添加到$this->fieldsets[$name]
+3.如果不继承于FieldsetInterface,而只是单纯继承于ElementInterface,则会添加到$this->elements[$name]
+
+
+<pre>
+<?php
+
+use Zend\Form\Form;
+
+class LoginFrom extends Form{
+  public function __construct() {
+    parent::__construct();
+
+	$this->add(array(
+            'type' => 'Zend\Form\Element\Email',
+            'name' => 'email',
+            'options' => array(
+                'label' => 'Your email address',
+            ),
+        ));
+	$this->add(array(
+            'type' => 'Zend\Form\Fieldset',
+        ));
+	 $this->add(array(
+            'type' => 'Zend\Form\Element\Csrf',
+            'name' => 'csrf'
+        ));
+	 $this->add(array(
+            'name' => 'submit',
+            'attributes' => array(
+                'type' => 'submit',
+                'value' => 'Send'
+            )
+        ));
+}
+?>
+</pre>
+
+
+hydrator绑定数据:多种方法
+一
+'hydrator'  => 'Zend\Stdlib\Hydrator\ArraySerializable'用于绑定数据到表单
+绑定的数据是个对象且必须拥有getArrayCopy()方法.多为ArrayObject().
+二.
+$this->setHydrator(new ClassMethodsHydrator(false))
+             ->setObject(new Product());
+使用这个可以getXxx(),setXxx()
+
+
+注意:绑定的对象,在验证后仍然可以使用.而且已经赋值了.
+
+
+
+表单注释 Annotation,通过注释创建表单
+<pre>
+<?php
+use Zend\Form\Annotation;
+
+/**
+ * @Annotation\Name("user")
+ * @Annotation\Hydrator("Zend\Stdlib\Hydrator\ObjectProperty")
+ */
+class User
+{
+    /**
+     * @Annotation\Exclude()
+     */
+    public $id;
+
+    /**
+     * @Annotation\Filter({"name":"StringTrim"})
+     * @Annotation\Validator({"name":"StringLength", "options":{"min":1, "max":25}})
+     * @Annotation\Validator({"name":"Regex", "options":{"pattern":"/^[a-zA-Z][a-zA-Z0-9_-]{0,24}$/"}})
+     * @Annotation\Attributes({"type":"text"})
+     * @Annotation\Options({"label":"Username:"})
+     */
+    public $username;
+
+    /**
+     * @Annotation\Type("Zend\Form\Element\Email")
+     * @Annotation\Options({"label":"Your email address:"})
+     */
+    public $email;
+}
+
+
+
+use Zend\Form\Annotation\AnnotationBuilder;
+
+$builder = new AnnotationBuilder();
+$form    = $builder->createForm('User');
+?>
+</pre>
+
+
+
+如果你创建了自己的表单元素,可以添加默认验证处理方式.可以免去inputfilter
+必须实现InputProviderInterface.
+
+<?php
+class SenderFieldset extends Fieldset implements InputFilterProviderInterface
+{
+    public function getInputFilterSpecification()
+    {
+        return array(
+            'name' => array(
+                'required' => true,//验证器
+                'filters'  => array(    //
+                    array('name' => 'Zend\Filter\StringTrim'),  
+                ),
+            ),
+            'email' => array(
+                'required' => true,
+                'filters'  => array(//过滤器
+                    array('name' => 'Zend\Filter\StringTrim'),
+                ),
+                'validators' => array(//验证器
+                    new Validator\Email(),
+                ),
+            ),
+        );
+    }
+}
+
+?>
+element会检查并创建下面的元素:
+<?php
+$this->add(array(  
+            'type' => 'Zend\Form\Element',//会实例化它,仍然是集成element的属性
+            'name'=>'aaaaa',
+            'options'=>array(),
+            'attributes'=>array(),
+        ));
+
+?>
+
+?>
+
+
+
+fieldset会先创建element.再额外检查并创建下面的元素
+factory::createFieldset()
+
+<?php
+ $this->add(array(  
+            'type' => 'Zend\Form\Fieldset',//会实例化它,仍然是集成element的属性
+
+            //$element = $this->createElement($spec);
+            //$fieldset->add($element, $flags);    ------最终添加到elements属性中
+            'elements'=>array(    
+				array(
+					'spec' => array(
+							'name' => 'name',
+							'options' => array(
+							'label' => 'Your name',
+						),
+						'attributes' => array(
+							'type'  => 'text'
+						),
+					),
+					'flags'=>,
+				),
+            ),
+            'object'=>,      //是个类名,会被实例化并, $fieldset->setObject(new $objectName);
+            'hydrator'=>'',  //$fieldset->setHydrator($hydrator);
+            'fieldsets'=>'',
+        ));
+
+?>
+
+
+
+form会先创建fieldset.再额外检查并创建下面的元素
+factory::createForm()
+<?php
+$this->add(
+		array(
+			'type' => 'Zend\Form\Form',
+			//可以为类名也可以为数组,类名必须继承InputFilterInterface
+			//如果是一个数组,会通过inputfilter工厂,创建input filter
+			//最终$form->setInputFilter($filter);
+			'input_filter'=>'',   // $form->setInputFilter($filter);
+			'validation_group'=>'', //  $form->setValidationGroup($spec);
+		)	
+	)
+
+
+?>
+
+
+
+
+注意 use_base_fieldset 选项。 这个选项是在这里说到的形式: “嘿,我对你的对象绑定,事实上,绑定到控件组,是 基自定义字段。 “这将是真正的大多数时间。 
+
+
+
+
+
+
+
+
+checkbox表单元素
+<?php
+        $this->add(array(
+            'name' => 'remember',
+            'type' => 'Zend\Form\Element\Checkbox',
+            'options' => array(
+                'label' => '记住我',
+                'label_attributes'=>array(
+                    'class'=>'remember',
+                    'for'=>'remember',
+                ),
+                'use_hidden_element'=>FALSE,//隐藏hidden元素
+                'checked_value' => 'good',//默认1
+                     'unchecked_value' => 'bad'//默认0
+            ),
+            'attributes' => array(
+                'type' => 'checkbox',
+            ),
+        ));
+
+        ?>
+<?php echo $this->formRow($form->get('remember'),'append')?>
+
+
+<label class="remember" for="remember">
+	<input type="hidden" name="remember" value="bad">
+	<input type="checkbox" name="remember" value="good">
+	<span>记住我</span>
+</label>       

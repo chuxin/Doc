@@ -1,0 +1,23 @@
+
+
+
+<?php
+
+$data = $form->getData();
+
+$sessionManager = $this->getServiceLocator()->get('sessionManager');
+
+$dbAdapter = $this->getServiceLocator()->get('db');
+
+$adapter = new \Zend\Authentication\Adapter\DbTable($dbAdapter, 'user', 'username', 'password');
+
+$adapter->setIdentity($data['username'])->setCredential($data['password']);
+
+$storage = new \Zend\Authentication\Storage\Session(null, null, $sessionManager);
+
+$auth = new \Zend\Authentication\AuthenticationService($storage, $adapter);
+
+$result = $auth->authenticate();
+
+
+?>

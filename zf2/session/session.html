@@ -1,0 +1,66 @@
+有意思的地方:
+默认没有设置saveHandler.也就是使用session_start后就使用默认的文件方式存储.
+
+
+只要一次设置了saveHandler后,就会注册  $this->registerSaveHandler($saveHandler);
+
+
+之后的Container中对session的设置都会使用该种方法存储.
+
+
+
+
+
+
+config   设置session的php配置选项
+Storage   将session存储到类中,使$_SESSION可以用对象访问
+SaveHandler  session存储方法
+Container  会把sessionManage注入.提供更多的方法存储session.亦可使用对象存储..不同的Container通过storage使用不同的键存储
+例如
+Container('admin');中 $container->user = 'xiaoming',会在session里这样存储storage['admin']['user']='xiaoming'
+Container('User');中 $container->user = 'liming',会在session里这样存储storage['User']['user']='liming'
+两个是不同的容器.
+
+
+SessionManager($config,  $storage, $saveHandler)
+
+
+
+<?php
+
+$config = $e->getApplication()->getServiceManager()->get('config');
+// get the database section
+$dbAdapter = new \Zend\Db\Adapter\Adapter($config['session_db']);
+
+// get the session options (column names)可自定义列名
+$sessionOptions = new \Zend\Session\SaveHandler\DbTableGatewayOptions($config['session_config']);
+
+// crate the TableGateway object specifying the table name
+$sessionTableGateway = new \Zend\Db\TableGateway\TableGateway('session', $dbAdapter);
+// create your saveHandler object
+$saveHandler = new \Zend\Session\SaveHandler\DbTableGateway($sessionTableGateway, $sessionOptions);
+
+// pass the saveHandler to the sessionManager and start the session
+$sessionManager = new \Zend\Session\SessionManager(NULL, NULL, $saveHandler);
+$sessionManager->start();
+
+?>
+
+<?php
+CREATE TABLE IF NOT EXISTS `session` (
+  `id` char(32) NOT NULL DEFAULT '',
+  `name` varchar(255) NOT NULL,
+  `modified` int(11) DEFAULT NULL,
+  `lifetime` int(11) DEFAULT NULL,
+  `data` text,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+?>
+
+
+
+sessionManager::rememberMe($ttl)//设置session存储时间
+
+
+
