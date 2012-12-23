@@ -1,0 +1,20 @@
+1.首先视图中使用$this->Navigation('navigation') 导航
+
+'navigation'是个服务名,会在视图中通过servicelocatle获取这个service.如下
+
+
+2.'Navigation' => 'Zend\Navigation\Service\DefaultNavigationFactory',
+
+DefaultNavigationFactory会通过$configuration['navigation'][$this->getName()]获取pages.
+所以要定义多个navigation.需要定义多个工厂.
+
+
+3.如果该page中有action,controller,route则是mvcpage..
+
+
+4.未定义路由则为当前页面的路由
+
+5.关于路由的生成是在 getHref()中..控制器和动作会整合入$params中
+
+ $url = $router->assemble($params, $options);
+

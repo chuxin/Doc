@@ -1,0 +1,13 @@
+php doctrine orm:schema-tool:create  根据实体创建数据表
+
+php doctrine orm:schema-tool:drop --force  删除数据表
+
+
+php doctrine orm:convert-mapping --from-database annotation .\Entities  从数据库映射到实体中使用注释
+
+xml yaml  php   annotation
+
+
+上面只是把数据库的元数据映射到php文件中,但是没有实现getter和setter方法.添加方法的话使用下面的命令
+
+php doctrine orm:generate-entities --generate-annotations="true" ./path
