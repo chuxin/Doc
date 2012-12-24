@@ -19,6 +19,23 @@ $options['escapeLabels'] = false;
 
 
 
+
+
+
+
+
+
+直接使用navigation设置面包屑
+
+<?php
+ echo $this->navigation('Navigation')
+        ->breadcrumbs()
+        ->setLinkLast(false)               // link last page
+        ->setMaxDepth(7)                   // stop at level 7
+        ->setMinDepth(0)                   // start at level 0
+        ->setSeparator(' »' . PHP_EOL);    // separator with newline 
+?>
+
 Breadcrumbs  是个树形的pages而且必须在子page中设置active：
 <?php
 'news' => array(
