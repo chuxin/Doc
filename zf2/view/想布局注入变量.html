@@ -1,0 +1,28 @@
+1.获取viewModel.
+ $this->event->getViewModel();
+
+
+ 2.使用布局
+ $this->layout()
+
+
+
+ 3.使用视图占位符
+
+控制器中:
+
+      $registry  = \Zend\View\Helper\Placeholder\Registry::getRegistry();
+      
+      $registry->getContainer('jsScripts')->files[] = '/js/aaa.js';
+
+
+ 视图中
+        <?php 
+        $jsScripts = $this->placeholder('jsScripts')->files;
+        
+        foreach ($jsScripts as $value)
+        {
+            echo $value;
+        }
+           
+        ?>
