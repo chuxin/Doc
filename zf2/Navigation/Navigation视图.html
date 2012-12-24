@@ -1,0 +1,85 @@
+Navigation模块可以说是提供的数据。Navigation视图就是为了显示
+
+
+menu有很多默认属性：
+escapeLabels=false 不格式化label中的html。这样就可以在Navgation中使用html了
+ulClass  设置ul的class
+
+如果page的属性active=true，则会设置li的class="active"
+
+如何注册这些属性，有两个方法：
+一。使用__toString方法
+<?php echo $this->navigation($nav)->menu()->escapeLabels(false); ?>
+
+
+二。直接使用renderMenu($container,$options);在options中注册属性
+$options['escapeLabels'] = false;
+<?php echo $this->navigation($nav)->menu()->renderMenu(null,$options);; ?>
+
+
+
+
+Breadcrumbs  是个树形的pages而且必须在子page中设置active：
+<?php
+'news' => array(
+    'label' => 'News',
+    'controller' => 'news',
+    'action' => 'news',
+    'route' => 'default',
+    'params'=>array('__NAMESPACE__'=>'ssssss'),
+    'pages' => array(
+        'add' => array(
+            'label' => 'Add news',
+            'controller' => 'news', /* or create a seperate route insteed */
+            'action' => 'add',
+            'route' => 'default',
+              'active'=>TRUE
+        ),
+    ),
+),
+$mvcPage = new \Zend\Navigation\Navigation($nav);
+$router =  $this->getServiceLocator()->get('Router');
+\Zend\Navigation\Page\Mvc::setDefaultRouter($router);
+$viewModel = new \Zend\View\Model\ViewModel(array('nav' => $this->getNav()));
+
+ //---------------view------------------
+ <?php echo $this->navigation($nav)->breadcrumbs(); ?>
+?>
+
+
+
+是不是使用起来，这个布局定义不能改，怎么办？
+可以使用Partial子模板。会调用$this->view->plugin('partial');partial插件。
+<pre>
+<?php
+echo $this->navigation()->breadcrumbs()
+                        ->setPartial(array('layout/breadcrumbs.phtml', 'default'));
+?>
+</pre>
+
+注意：
+Breadcrumbs传到子模板中的数组是array('pages'=>$pages);
+Menu传到子模板中的数组时$model = array('container' => $container);
+<pre>
+<?php
+print_r($pages)
+?>
+<div>
+    <ul class="breadcrumb">
+        <?php
+        $html = '';
+        $count =  count($pages);
+        foreach ($pages as $k => $page) {
+            $html .= '<li>';
+            $html .= '<a href="'.$page->getHref().'">'.$page->getLabel().'</a>';
+            if ($count != $k + 1) {
+                $html .= '<span class="divider">/</span>';
+            }
+            $html .='</li>';
+        }
+        echo $html;
+        ?>
+    </ul>
+</div>
+</pre>
+然后处理这个数组就可以了。

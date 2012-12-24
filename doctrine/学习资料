@@ -1,0 +1,14 @@
+Doctrine2 是一个很流行的PHP的ORM程序,
+
+先看这两篇文章,学习一些Doctrine2的基本
+05.12. Doctrine 2
+06.12. Doctrine 2 – Zend Framework Integration
+
+熟悉了这些基本概念之后,再去看官方的教程就比较轻松了
+Getting Started: Code First
+
+但是学到一般,感觉对entity之间的关系还是不大了解,于是找到这篇通熟易懂的文章来学习:
+Introduction to Mapping Object Relationships
+
+同一网站上的这篇文章也一定要看
+Doctrine 2 in Depth

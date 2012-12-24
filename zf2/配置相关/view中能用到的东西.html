@@ -1,0 +1,38 @@
+new viewModel($variables = null, $options = null)
+
+
+所有的$variables和$options 会在Zend\View\Renderer\PhpRenderer这个文件中接受处理
+
+ $options = $model->getOptions();
+    foreach ($options as $setting => $value) {
+        $method = 'set' . $setting;
+        if (method_exists($this, $method)) {
+            $this->$method($value);
+        }
+        unset($method, $setting, $value);
+    }
+
+
+  $values = $model->getVariables();
+
+
+
+$variables  可以直接使用
+
+$options  会调用方法setkey(value)  可以继承PhpRenderer
+
+
+
+如何在控制器中设置布局的变量？有两种方法：
+
+一。设置最外层viewModel的变量
+
+$this->event->getViewModel()->setVariable('no_visible_elements', FALSE);
+
+二。使用Placeholder
+控制器中:
+$vm = $this->getServiceLocator()->get('ViewHelperManager');
+$vm->get('headtitle')->__invoke('这个是' . $ui . '演示');
+
+视图中：
+<?php echo $this->headTitle() ?>

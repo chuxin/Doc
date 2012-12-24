@@ -1,0 +1,60 @@
+1.Form::setData();首先设置表单数据.设置hasValidated为false未验证,分别设置data属性,和各个表单元素的value
+2.设置inputfilter::setData(),设置inputfilter::setValidationGroup(),获取inputfilter::isValid(),并设置
+为表单的isValid.并把hasValidated设置为已经验证(Form::getData()会判断是否已经验证,已经验证的话则会返回数据)
+
+3.如果isValid为true,则绑定值bindValues()到指定绑定对象上;
+注意:如果baseFieldset存在,则会把绑定对象设置为baseFieldset的绑定对象
+
+绑定对象的过程会使用hydrator
+$this->object = $hydrator->hydrate($hydratableData, $this->object);
+
+4.如果isValid为false,则会设置为错误消息
+
+5.注意Form::getData()会判断是否已经验证,才会返回数据
+1.如果绑定了对象而且$flag的要求不是返回数组FormInterface::VALUES_AS_ARRAY,则会返回绑定对象.
+2.默认返回的不是表单元素的值,返回的是inputfilter的值
+
+
+$flag是指定返回的是原始值,还是过滤后的值
+
+
+---------------------------------------------------------------------
+注意:inputfilter并不是直接使用设置的inputfilter.
+而是使用form::getInputFilter()了,这里面会循环所有的表单元素,并附加所有的表单元素到inputfilter中.
+  $this->attachInputFilterDefaults($this->filter, $this);
+
+这里会循环所有的表单元素,并且查看是否实现InputProviderInterface.并通过inputfilter Factory创建输入元素.
+1.如果没有实现InputProviderInterface,并且inputfilter不存在该元素,则设置 $spec = array('name' => $name, 'required' => false);
+2.如果实现了InputProviderInterface,则 $spec  = $element->getInputSpecification();
+
+然后会通过$input = $inputFactory->createInput($spec);  通过inputfilter Factory创建元素
+最后会添加到$inputFilter->add($input, $name);输入过滤器中
+
+
+
+
+
+
+============================================
+输入过滤的验证
+1.循环所有的输入元素,进行验证isValid,验证的时候会把Form->data作为上下文传进去.
+
+
+2.验证成功会添加到属性validInputs数组中:$this->validInputs[$name] = $input;
+
+3.验证失败会添加到属性invalidInputs数组中:$this->invalidInputs[$name] = $input;并且设置验证false返回
+
+4.如果输入元素的属性breakOnFailure,则会跳出剩下的所有验证.就是不接着进行其他表单的验证
+================================
+输入元素的验证:
+1.首先会向过滤连注入不为空的验证  $this->injectNotEmptyValidator();  这一步会判断required和allow_empty
+2.通过过滤连验证值.
+        $validator = $this->getValidatorChain();
+        $value     = $this->getValue();
+        $result    = $validator->isValid($value, $context);
+
+3.如果设置了fallbackValue,且过滤连验证失败,会使用fallbackValue作为最终值返回,并且设置验证成功
+
+
+
+getMessages()错误信息是通过过滤连获取的错误消息

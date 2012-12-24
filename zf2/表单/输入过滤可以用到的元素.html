@@ -1,0 +1,30 @@
+参见factory::createInput()
+
+
+$this->add(
+
+array(
+	'type'=>'',//可继承InputFilterInterface或者InputInterface,如果不是则实例化Zend\InputFilter\Input
+
+	'name'=>'',
+
+	'required'=>'',
+
+	'allow_empty'=>'',
+
+	'fallback_value'=>'',
+
+	'filters'=>'',//可继承FilterChain
+
+	'validators'=>'',
+
+)
+
+
+)
+
+
+每个输入元素都有一个过滤链和验证链..就是连锁的过滤
+
+
+

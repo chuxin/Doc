@@ -1,0 +1,40 @@
+实体Entities
+
+Doctrine2的实体是轻量级的持久化类。除了下面的限制，它们就是一般的PHP类
+
+    实体类不能是final，也不能包涵final方法
+    实体类不能实现__clone方法，或者安全的实现
+    实体类不能实现__wakeup方法，或者安全的实现
+    任何直接或间接继承的实体类不能含有相同的map属性。
+
+实体类支持继承，多态关联和多态查询。抽象和具体类都可以是实体类。实体类可以继承自非实体类和实体类。一般类也可以继承自实体类。
+
+    PHP构造函数只有在使用new创建对象时才会被调用，Doctrine不会调用构造函数，所以你可以根据需要实现构造函数，比如传递多个参数。
+
+实体状态
+
+Doctrine实体对象根据状态划分为NEW, MANAGED, DETACHED or REMOVED.
+
+    NEW: 新建的实体对象没有持久化标识（identity），也不和EntityManager或UnitOfWork关联。 (比如：那些刚用new新建的对象).
+    MANAGED: 被管理的实体对象有一个持久化标识和EntityManager关联，所以它们识被管理的状态。
+    DETACHED: 指有持久化标识 但是还没有（或者不再）和EntityManager或UnitOfWork关联。
+    REMOVED: 指有持久化标识，且与EntityManager关联，但是在下次事务提交时会被从数据库中删除的实体对象。
+
+持久字段(Persistent fields)
+
+实体的持久状态是通过对象变量来表现的。一个对象变量一定只能被这个对象自己的方法直接调用。
+对象变量不能被实体的客户端调用。实体的状态变量只能被客户端通过其方法来调用。比如通过 (getter/setter方法) 或者其他的业务方法。
+
+集合类型的持久字段一定要定义成 DoctrineCommonCollectionsCollection。 在实体持久化前，集合类型的字段可以被应用程序调用来初始化字段或变量。一旦实体类处于managed(或者detached）的状态时，就只能通过接口 类型来调用了
+序列化实体类Serializing entities
+
+序列化实体类可能造成问题，也是不推荐的，至少不要在实体类还持有代理对象的引用或者仍然被EntityManager管理的时候序列化。如果你想 要序列化（或者反序列化）仍然持有代理对象引用的实体对象，由于技术限制你在会私有（private）属性上碰到问题。代理对象实现__sleep方法， 但是__sleep方法不能返回父类的私有属性。 也就是在代理对象上实现Serailizable是不可行的，因为Serializable和任何有潜在关联引用的对象都会出问题（至少我们还没有发现好 的方法，如果你发现了，不妨告诉我们）。
+EntityManager
+
+EntityManager类是进入Doctrine 2 ORM框架的中心接入点。EntityManager API用来管理你的实体对象和实体对象对象。
+事务write-behind
+
+EntityManager和底层的UnitOfWork使用“transactional write-behind”策略来延迟执行SQL语句，使得执行的效率更高，而且只在每次事务结束时执行使得所有的写锁能快速的被释放。你可以把 Doctrine看做是使用精细定义的工作单元来同步你内存对象和数据库的工具。像平时一样使用和修改你的对象，然后在需要的时候调用 EntityManager#flush()来持久化你的修改。
+工作单元(The Unit of Work)
+
+在EntityManager内部使用UnitOfWork，它是Unit of Work模式的典型实现，用来跟踪下次执行flush时所有需要执行的事情。一般你只和EntityManager交互而不会和UnitOfWork直接交互。
