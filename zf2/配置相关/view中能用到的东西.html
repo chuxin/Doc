@@ -36,3 +36,21 @@ $vm->get('headtitle')->__invoke('这个是' . $ui . '演示');
 
 视图中：
 <?php echo $this->headTitle() ?>
+
+
+
+三..如果想干掉最外层视图可以:
+直接使用$this->layout()设置新布局
+
+或者破坏布局
+
+  $this->layout()->setTerminal(TRUE);
+
+
+$events->getSharedManager()->attach('Zend\Stdlib\DispatchableInterface', MvcEvent::EVENT_DISPATCH, array($this, 'setTerminal'), -90);
+
+
+
+
+
+
