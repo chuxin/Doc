@@ -55,7 +55,7 @@ mvc有四个参数：route，controller，action，params。最后getHref中，�
         );
         $mvcPage = new \Zend\Navigation\Navigation($nav);
         $router =  $this->getServiceLocator()->get('Router');
-        //必须设置路由，才能使用mvc
+        //必须设置路由，才能使用mvc  这种方式设置会出isactive会出问题建议仍然使用工厂模式
         \Zend\Navigation\Page\Mvc::setDefaultRouter($router);
 
        $viewModel = new \Zend\View\Model\ViewModel(array('nav' => $mvcPage));
