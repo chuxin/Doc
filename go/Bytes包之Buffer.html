@@ -1,0 +1,55 @@
+<h2>Buffer</h2>
+<p>缓冲区是一个可变大小的字节缓冲区并拥有读写方法,零值的缓冲区是一个空的缓冲区,预备使用。</p>
+
+<pre>
+type Buffer struct {
+	buf       []byte            // 使用b.Bytes()读取的值是 buf[off : len(buf)]
+	off       int               // read at &buf[off], write at &buf[len(buf)]
+	runeBytes [utf8.UTFMax]byte // 避免在每一个WriteByte上分配 each 或者 Rune
+	bootstrap [64]byte          // 使用内存保存第一个slice,帮助小的buffer避免分配
+	lastRead  readOp            // 最后的读操作
+}
+</pre>
+
+<dl>
+	<dt>Bytes() []byte</dt>
+	<dd>返回缓冲区的字节,值是b.buf[b.off:]</dd>
+	<dt>String() string</dt>
+	<dd>返回字符窜,string(b.buf[b.off:])</dd>
+	<dt>Len()</dt>
+	<dd>返回buffer的长度.len(b.buf) - b.off</dd>
+	<dt>Truncate(n int)</dt>
+	<dd>没有返回值,截取buffer使其变为b.buf[0 : b.off+n]</dd>
+	<dt>Reset()</dt>
+	<dd>相同与b.Truncate(0)</dd>
+	<dt>Grow(n int) </dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+</dl>

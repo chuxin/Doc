@@ -1,0 +1,41 @@
+colorbox是个模块化的js框架.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+colorbox_header  定义了__main_module_name__主模块名和__resources__变量.以及__imageResource(data),建立一个image对象.data参数是img.src
+colorbox_module  模块管理.加载了模块path.和platform.还有主模块.并执行主模块的main()函数.
+所以程序的一切开始,都是从主模块的main()函数开始.
+暴漏的函数有
+require(request, parent)引入模块
+resource(path)  会返回模块的data函数
+
+模块原理:
+1.各模块保存在数组__resources__中,键名是模块名,值是一个对象.meta属性记录了资源类型,data是一个函数会在加载的时候调用.
+
+2.加载模块时,若为指定父模块,则模块的父模块是main主模块.
+
+3.如果父模块的缓存中存在,该模块,则直接返回该模块.避免二次实例化
+
+4.如果父模块中没有该模块.则新建模块.
+
+5.把新建的模块,添加到父模块的缓存中.然后初始化.初始化的时候,会调用模块中的data函数
+
+6.data函数的第三个参数即使,该模块对象.将模块独享注入到该函数中,并将要暴漏的对象或者函数,赋给该对象的exports属性.
+
+
+path   主要用于操作模块的路径
+
+platform 平台  实现了.domready.bindReady.ready.isMobile函数

@@ -1,0 +1,122 @@
+<h2>公共成员</h2>
+任何函数可以访问,修改,添加或删除这些成员.主要有两种途径:
+<h3>构造函数</h3>
+<p>通常是用来初始化对象属性,使用this在构造函数内设置.</p>
+<p>因为使用this初始化的对象属性可以使用hasOwnProperty("member")判断该属性是否存在,迭代出属性的所有对象.原型中设置的属性用hasOwnProperty是获取不到的.
+</p>
+<pre>
+function Container(param){
+this.member = param
+}
+</pre>
+<h3>原型</h3>
+通常是用来添加公共方法.
+<pre>
+Container.prototype.stamp = function (string) {
+    return this.member + string;
+}
+</pre>
+<h2>私有</h2>
+<h3>属性和方法</h3>
+构造函数里定义的function，即为私有方法；而在构造函数里用var声明的变量，也相当于是私有变量。
+<pre>
+var Person = function(name,sex){
+    this.name = name;
+    this.sex = sex;     
+    var _privateVariable = "";//私有变量    
+    //构造器中定义的方法，即为私有方法
+    function privateMethod(){   
+        _privateVariable = "private value";
+        alert("私有方法被调用！私有成员值：" + _privateVariable);             
+    }
+    privateMethod(); //构造器内部可以调用私有方法            
+}
+ 
+Person.prototype.sayHello = function(){
+    alert("姓名：" + this.name + "，性别：" + this.sex);
+}
+ 
+var p = new Person("菩提树下的杨过","男");      
+p.sayHello();
+ 
+//p.privateMethod();//这里将报错，私成方法无法被实例调用
+alert(p._privateVariable);//显示: undefined
+</pre>
+<h3>特权</h3>
+使用一种特权的方法使外部能够访问私有变量和方法.set和get往往用于设置和读取私有变量
+<pre>
+var Person = function(){    
+    var salary = 0.0;
+ 
+    this.setSalary = function(value){
+        salary = value;
+    }
+ 
+    this.getSalary = function(){
+        return salary;
+    }
+}
+ 
+var p = new Person();
+ 
+p.setSalary(1000);
+alert(p.getSalary());//返回1000
+alert(p.salary);//返回undefined
+</pre>
+<h2>静态</h2>
+<h3>静态类</h3>
+<p>首先来明确下静态类的定义：  不能被实例化，仅包含静态成员，不包含实例构造函数，无需创建实例，用类名就能直接访问其成员。</p>
+<pre>
+StaticClass = {
+    a1: 1,
+    a2: 2,
+    f1 : function(){},
+    f2 : function(){}
+}
+</pre>
+<p>由于StaticClass不包含构造函数，所以不能用new来实例化。 它其实就是一个全局对象。</p>
+<p>一般可以使用即时函数创建一个静态类,这样可以保存一些局部变量，和私有函数，并能做一些预处理。</p>
+<pre>
+re = function(){
+var t1 = 1;
+        var t2 = 2;
+        function f1(){};
+        function f2(){};
+        var re = {
+   a1: xxx,
+           a2: xxx,
+           fn1:function(){},
+           fn2:function(){}
+}
+return  re;
+}()
+</pre>
+<h3>静态属性和方法</h3>
+<p>所谓的静态，不能由实例调用，只能用类名调用</p>
+<pre>
+function Person(name) {
+    //非静态属性
+    this.name = name;
+    //非静态方法
+    this.show = function() {
+        alert(‘My name is ‘ + this.name + ‘.’);
+    }
+}
+//添加静态属性，人都是一张嘴
+Person.mouth = 1;
+//添加静态方法，哇哇大哭
+Person.cry = function() {
+    alert(‘Wa wa wa …’);
+};
+//使用prototype关键字添加非静态属性，每个人的牙可能不一样多
+Person.prototype.teeth = 32;
+ 
+//非静态方法必须通过类的实例来访问
+var me = new Person(‘Zhangsan’);
+//使用非静态方法、属性
+me.show();
+alert(‘I have ‘ + me.teeth + ‘ teeth.’);
+//使用静态方法、属性
+Person.cry();
+alert(‘I have ‘ + Person.mouth + ‘ mouth.’);
+</pre>

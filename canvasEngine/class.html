@@ -1,0 +1,101 @@
+<h2>Kernel</h2>
+类的内核.属性的操作.以及继承的底层实现.以及类的实例化
+<ul>
+	<li>class_method:类的方法</li>
+	<li>class_name:类名</li>
+</ul>
+<dl>
+	<dt>new()</dt>
+	<dd>实例化一个对象
+		<pre>
+			kernel  =  new Kernel(methods,name)
+			class = kernel.new()
+		</pre>
+
+	</dd>
+	<dt>New()</dt>
+	<dd>
+		调用new()方法,实例化一个对象
+		<pre>
+			kernel = new Kernel;
+			class = kernel.New(methods,name)
+		</pre>
+	</dd>
+	<dt>extend</dt>
+	<dd>扩展class_methods</dd>
+	<dt>_attr_accessor(attr)</dt>
+	<dd>
+		<p>设置属性是否可读写,属性名称在类内部为_attr.使用get(),set()读取和设置</p>
+		<ul>
+			<li>attr_accessor():可读可写</li>
+			<li>attr_reader():可读</li>
+			<li>attr_writer():可写,属性名称为_</li>
+		</ul>
+		<pre>
+			Class.create("Foo", {
+				mymethod: function() {
+					this.bar.set(5);
+					console.log(this.bar.get()); // Value of property "bar" is 5
+					console.log(this._bar); // ditto
+				}
+			}).attr_accessor(["bar"]);
+		</pre>
+	</dd>
+	<dt>addIn(name)</dt>
+	<dd>将当前内核,以内核名作为属性添加到指定对象中.如果Class.__class中没有该对象,则返回该内核,如果有的话
+		<pre>
+			kernel = new Kernel(method,"subclass");
+			kernel.addIn(name)
+
+			Class.get(name).subclass
+		</pre>
+	</dd>
+</dl>
+
+
+
+<h2>Class</h2>
+Class 主要实现了类似DI的注入功能.保存了类的初始属性和类的内核(类).以及实例化后的对象
+Class 有两个属性
+__class			:保存了实例化后的对象
+__class_config  :保存了类
+<dl>
+	<dt>Class.Create(name, methods, _static)</dt>
+	<dd>
+		<p>
+			创建一个类,返回一个Kernel对象.可以通过该对象设置属性等操作
+			将类的方法和内核写入到类配置中
+			Class.__class_config[name].methods = methods;
+			Class.__class_config[name].kernel = new Kernel(Class.__class_config[name].methods, name);
+		</p>
+	</dd>
+	<dt>Class["new"](name, params, initialize)</dt>
+	<dd>
+		实例化一个对象,实例化后执行initialize()函数,其params在初始化的时候有用.并保存在了__class中.
+	</dd>
+	<dt>New()</dt>
+	<dd></dd>
+	<dt>get(name)</dt>
+	<dd>返回实例化对象</dd>
+	<dt>extend(object, clone) </dt>
+	<dd>继承.  实例化对象的时候,实际上class = new Class(),然后把methods传给class..还可以用做继承</dd>
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

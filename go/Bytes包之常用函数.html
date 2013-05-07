@@ -1,0 +1,90 @@
+<h2>Compare(a, b []byte) int</h2>
+<dl>
+	<dt>比较两个字节切片大小,先从0键开始比较他们的值,在比较他们的长度</dt>
+	<dd>如果返回值为0,则两个相等</dd>
+	<dd>如果返回值为-1,则a小于b</dd>
+	<dd>如果返回值为1,则a大于b</dd>
+</dl>
+
+<pre>
+func main() {
+	a := []byte{2, 3, 4, 5}
+	b := []byte{1, 2, 3, 4}
+	fmt.Println(bytes.Compare(a, b))   //1
+}
+</pre>
+
+
+<h2>Count(s, sep []byte) int</h2>
+如果sep中有元素,存在与s中则返回1,否则返回0.如果sep的长度为0.则返回s的字节数(utf8.RuneCount(s))+1
+<pre>
+	a := []byte("诉讼法")
+	b := []byte{}
+	fmt.Println(bytes.Count(a, b))   //4
+   
+   	a := []byte{2, 3, 4, 5}
+	b := []byte{2}
+	fmt.Println(bytes.Count(a, b))   //1
+
+	a := []byte{2, 3, 4, 5}
+	b := []byte{55}
+	fmt.Println(bytes.Count(a, b))  //0
+</pre>
+
+<h2>Contains(b, subslice []byte) bool</h2>
+<p>subslice是否在b中,必须按照顺序才算包含.</p>
+<pre>
+	a := []byte{2, 3, 4, 5}  
+	b := []byte{2, 3}
+	fmt.Println(bytes.Contains(a, b))  //true
+
+	a := []byte{2, 3, 4, 5}
+	b := []byte{5, 3}
+	fmt.Println(bytes.Contains(a, b))   //false
+</pre>
+
+<h2>Index(s, sep []byte) int</h2>
+<p>sep在s中的索引位置,如果不在则返回-1,如果sep的长度为0,则返回s的长度</p>
+<pre>
+	a := []byte{2, 3, 4, 5}
+	b := []byte{55}
+	fmt.Println(bytes.Index(a, b))  //-1
+
+	a := []byte{2, 3, 4, 5}
+	b := []byte{4,5}
+	fmt.Println(bytes.Index(a, b))  //2
+
+	a := []byte{2, 3, 4, 5}
+	b := []byte{}
+	fmt.Println(bytes.Index(a, b))  //4
+
+</pre>
+
+<h2>LastIndex(s, sep []byte) int </h2>
+<p>同上面差不多,如果sep的长度为0,则返回0</p>
+
+<pre>
+	a:=[]byte{2,3,4,5}
+	b:=[]byte{}
+	fmt.Println(bytes.LastIndex(a,b))  //-1
+</pre>
+
+
+<h2>IndexRune(s []byte, r rune) int </h2>
+<p>rune在s中的索引位置,多用于中文.</p>
+<pre>
+	a := []byte("是打发士大夫")
+	b := []rune("打发")
+	fmt.Println(bytes.IndexRune(a, b[0]))
+</pre>
+
+<h2>IndexAny(s []byte, chars string) int</h2>
+<p>返回chars在s中的索引位置,如果chars是空,或者不存在s中,则返回-1</p>
+<pre>
+	a := []byte("abcdefgt")
+
+	fmt.Println(bytes.IndexAny(a, "fgt")) //5
+</pre>
+
+<h2>LastIndexAny(s []byte, chars string) int </h2>
+<p>和上面没有多大的区别</p>

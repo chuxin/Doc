@@ -1,0 +1,111 @@
+<h2>DisplayObject</h2>
+
+<h3>方法</h3>
+<dl>
+	<dt>initialize()</dt>
+	<dd>构造函数,初始化了DisplayObject的id属性.每申请一个displayObject则,id增1.同时初始化了_matrix矩阵对象</dd>
+	<dt>isVisible()</dt>
+	<dd>如果visible属性为true.且alpha透明度大于0,切scaleX和scaleY不等于0</dd>
+	<dt>draw()</dt>
+	<dd>将displayObject画到父容器中.每种displayObject的draw不一样.默认会根据缓存画到父容器中,除非忽略缓存true或者没有缓存</dd>
+	<dt>updateContext()</dt>
+	<dd>将transformation, alpha, globalCompositeOperation, clipping path (mask), 和 shadow应用到显示对象中</dd>
+	<dt>cache()</dt>
+	<dd>会创建一个canvas元素,然后保存数据,接着updateCache()</dd>
+	<dt>updateCache()</dt>
+	<dd>更新缓存</dd>
+	<dt>uncache()</dt>
+	<dd>清除当前缓存</dd>
+	<dt>getCacheDataURL</dt>
+	<dd>获取缓存数据URL</dd>
+	<dt>getStage()</dt>
+	<dd>获取舞台</dd>
+	<dt>localToGlobal()</dt>
+	<dd></dd>
+	<dt>globalToLocal()</dt>
+	<dd></dd>
+	<dt>localToLocal</dt>
+	<dd></dd>
+	<dt>setTransform</dt>
+	<dd>设置变形</dd>
+	<dt>getMatrix</dt>
+	<dd>获取矩阵</dd>
+	<dt>getConcatenatedMatrix</dt>
+	<dd></dd>
+	<dt>hitTest</dt>
+	<dd></dd>
+	<dt>set</dt>
+	<dd>复制属性到该dispalyobject</dd>
+	<dt>clone</dt>
+	<dd>克隆一个displayobject到一个新的displayobject上面</dd>
+	<dt></dt>
+	<dd></dd>
+	<dt></dt>
+	<dd></dd>
+</dl>
+
+
+
+<h3>属性</h3>
+<ul>
+	<li>alpha :透明度,0是完全透明的,1是完全不透明的,默认值1</li>
+	<li>cacheCanvas :缓存中的canvas,默认值null..详情看cache()函数</li>
+	<li>id:DisplayObject的唯一id,默认值-1</li>
+	<li>mouseEnabled:这个对象是否可以鼠标交互,默认true</li>
+	<li>name:这个显示对象的名称,常用于debug.在toString()函数中返回</li>
+	<li>parent:包含这个对象的容器</li>
+	<li>regX,regY:displayObject的注册点的偏移位置.使一个100x100px的bitmap围绕他的中心进行旋转,你可以把 regX 和regY 设置成 50.默认0</li>
+	<li>rotation:displayObject的旋转角度,默认0</li>
+	<li>scaleX,scaleY:displayObject的拉伸比例.默认1,若scaleX等于2则会伸展他正常宽度的两倍</li>
+	<li>skewX,skewY:默认0.displayObject的倾斜大小</li>
+	<li>shadow:阴影,默认null</li>
+	<li>visible:是否可见,默认1</li>
+	<li>x,y:displayObject在其父元素的位置</li>
+	<li>compositeOperation:复合操作</li>
+	<li>snapToPixel:</li>
+	<li>onPress|onClick|onDoubleClick|onMouseOver|onMouseOut|onTick:</li>
+	<li>filters:滤镜数组</li>
+	<li>cacheID:默认0</li>
+	<li>mask:默认null,一个Shape对象,为displayObject定义了一个显示蒙版</li>
+	<li>hitArea:</li>
+	<li>cursor:鼠标指针类型</li>
+
+</ul>
+
+
+
+
+
+
+<h3>updateContext</h3>
+
+mask: 一个Shape(形状)实例,用于创作蒙版
+
+1.完成蒙版的在ctx中的矩阵变形
+2.完成DisplayObject在ctx中的矩阵变性
+3.完成DisplayObject在ctx中的透明度设置
+4.完成DisplayObject在ctx中globalCompositeOperation组合效果
+5.完成DisplayObject在ctx中shadow阴影效果
+注意..默认画图的时候是不支持滤镜的..
+
+
+<h3>cache(x, y, width, height, scale) </h3>
+1.创建一个cacheCanvas,来保存该dispalyObject
+2.保存width,height,scale到._cacheOffsetX,_cacheOffsetY,_cacheScale
+3.执行updateCache()函数.将displayObject画到cacheCanvas上
+
+
+<h3>updateCache</h3>
+1.完成DisplayObject在ctx中globalCompositeOperation组合效果
+2.设置变形
+3.执行draw把图画在cacheCanvas上面,这里ignoreCache(忽略缓存)设置成了true
+4.滤镜设置_applyFilters()..滤镜只有在缓存的时候才有效.除非手动调用
+
+在再次画该DisplayObject的时候.只要把cacheCanvas画到画布上就可以了..省去了再去画该DisplayObject消费的资源
+
+<h3>关于Matrix2D</h3>
+主要是设置DisplayObject的矩阵.在执行draw画该DisplayObject前,使用ctx.transform()改变DisplayObject的矩阵
+
+
+<h3>getStage()</h3>
+返回舞台.循环DisplayObject的parent.直到其parent继承于createjs.Stage.才返回该parent

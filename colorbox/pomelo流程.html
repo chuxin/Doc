@@ -1,0 +1,306 @@
+1.main是游戏的入口
+初始化clientManager对象, 为loginBtn,registerBtn,heroSelectBtn绑定事件
+设置默认用户. 查询localStorage的username并设置到登录表单          
+初始化heroSelectView对象  设置角色选择页面的js
+
+2.ui/clientManager   设置clientManager的事件管理
+
+login登录流程
+1.验证客户端输入
+2.请求web端的登录接口.验证用户的账号密码是否正确.成功则将用户名存储到localStorage
+3.请求gate.gateHandler.queryEntry大门入口,请求分配服务器,获取服务器的ip和端口
+4.请求服务器的connector.entryHandler.entry入口,获取角色role数据和用户user数据
+5.执行loginMsgHandler.init(),和 gameMsgHandler.init();绑定踢人,断线,升级等各种服务器事件
+6.检查用户角色id是否存在,如果存在则执行afterLogin(),
+7.不存在则进入选择角色页面,创建角色.请求connector.roleHandler.createPlayer入口,如果创建成功.则执行afterLogin().
+8.将用户id和角色id,areaid和玩家数据赋值给全局变量pomelo
+9.然后加载资源.加载完成后进入游戏前奏界面gamePrelude.然后等12000毫秒进入游戏界面enterScene
+
+资源加载
+1.切换到资源加载页面.
+2.创建ResourceLoader对象,并绑定loading和complete事件.
+3.加载事件触发时会,改变进度条
+4.完成事件后,如果有回调函数会触发回调函数
+
+
+进入游戏:
+1.请求area.playerHandler.enterScene获取数据
+服务器将将用户加入聊天频道
+将用户加入场景area频道
+返回的数据是{场景信息.当前玩家信息,地图信息{地图名,宽,高,以及碰撞信息}}
+2.执行app.init(data);
+
+
+
+
+3.ui/heroSelectView   设置角色选择页面的js
+
+
+
+4.handler/loginMsgHandler  
+为该websocket绑定"onKick","disconnect","onUserLeave"等服务器事件
+
+5.handler/gameMsgHandler
+为该websocket绑定各种和用户操作相关的服务器事件
+
+6.ui/switchManager界面管理用来在各个界面中切换使用.登录,游戏,注册,角色选择.等
+
+
+7.utils/resourceLoader  
+resourceLoader函数.调用了EventEmitter  (lib/components/component-emitter/index.js,EventEmitter,jquery等都已经在lib/build/build.js里)
+
+loadAreaResource()
+1.向服务器area.resourceHandler.loadAreaResource请求area资源.资源分为:
+	<ul>
+		<li>PLAYER:玩家</li>
+		<li>MOB:MOB-Mobile原指游戏中所有由电脑控制的角色，现也引申指一般指怪物，任何游戏怪物都可叫MOB。</li>
+		<li>npc:npc  “非玩家控制角色”即npc（non player character）</li>
+		<li>item:物品</li>
+		<li>equipment:装备</li>
+		<li>mapName:地图名</li>
+	</ul>
+2.计算总加载资源数
+1 + 1 + (data.players.length  + data.mobs.length) * 16 + data.npcs.length + data.items.length + data.equipments.length
+第一个1 是默认的(程序里会向里面先添上1.在填其他的资源)..第二个是地图
+
+3.加载JsonResource.如果jsonLoad为true则请求服务器area.resourceHandler.loadResource.并发送本地存储的资源版本号(服务器上的这几个文件的修改时间戳)
+{"fightskill":1366598164000,"equipment":1366598164000,"item":1366598164000,"character":1366598164000,"npc":1366598164000,"animation":1366598164000,"effect":1366598164000}.服务端验证版本,如果和服务端不相等,则把最新修改的数据传给客户端.只有登录的时候才会请求jsonResource
+4.加载地图
+5.加载玩家角色(四种资源['Attack', 'Stand', 'Walk', 'Dead'])   //角色种类id
+6.加载怪物角色(同上)//怪物种类id
+7.加载npc
+8.加载物品.会读取本地item数据.从中imgID获取图片名称
+9.加载装备.会读取本地Equipment数据.从中imgID获取图片名称
+10.初始化怪物池
+11.初始化角色池
+至此.加载资源完毕.
+
+
+8.window.EventEmitter 就是为函数注册事件和触发事件.同easeljs中的EventDispatcher函数
+
+
+9.utils/dataApi  将服务器的一些数据存到本地.
+fightskill  战斗技能
+equipment   装备
+item        物品
+character   人物和怪物的初始数据
+npc         npc
+animation   人物和怪物动画
+effect      特效数据(战斗特效等)
+
+
+10.utils/pool/ObjectPoolFactory
+Stand Walk Attack  Dead
+左上 左下 右上 右下 每个角色拥有16 个对象池
+对象池工厂.
+1.为每个创建怪物和角色的运动动画对象.并将Animation对象赋予对象池
+2.poolName为 种类id_动画名
+3 将对象池加入到ObjectPoolManager对象中.键名为poolName.值为objectPool
+
+11.utils/pool/ObjectPool
+Object Pool，即对象池，对象被预先创建并初始化后放入对象池中，对象提供者就能利用已有的对象来处理请求，减少对象频繁创建所占用的内存空间和初始化时间，例如数据库连接对象基本上都是创建后就被放入连接池中，后续的查询请求使用的是连接池中的对象，从而加快了查询速度
+
+
+12.utils/pool/objectPoolManager
+对象池管理..在app.js中有个getObjectPoolManager()可以获取该对象池管理对象
+
+
+13.app.js
+
+应用初始化
+1.切换到游戏面板
+2.首次会初始化colorbox..初始化skch就是canvas,gv(gameview)和gd(gamedirector)
+3.配置数据.把模块全局变量skch和gv以及gd数据赋值给data
+
+
+
+14.lib/colorbox/helper 主要是用来创建canvas用的.创建image元素以及加载完成后的回调.创建audio元素
+
+
+15.lib/colorbox/view
+
+
+
+HonestView
+
+
+16.lib/colorbox/util
+extend(target, ext)  将第二个参数的OwnProperty复制给第一个参数
+beget(o)	新建一个对象.其原型是传入的o的
+each(obj, callback)    循环
+callback(target, method) 调用某个函数.使用apply.如果method是字符窜.则是该target的属性
+copy  新建一个对象.复制.
+
+ArrayIterator  数组迭代
+
+
+
+17.lib/colorbox/base.js
+
+BObject.extend(o)会返回一个新的构造函数
+1.该构造函数实例化的时候,会执行init()函数.
+如果想执行父类的init()函数.则在init函数中写入
+ xxx.superClass.init.call(this, param);
+
+2.该构造函数的原型拥有拥有extend和init函数.使其可以再次扩展
+3.将o的参数推入到newObj中
+4.superClass是该构造函数的原型
+
+
+18.lib/colorbox/director.js
+
+TimeStamper类
+newTimeStamper({startTime:0,'step':1})
+
+stepForward()当前时间加上dt  ,如果dt不存在,则加上step
+
+now()返回当前时间
+
+
+Director类  (导演)
+
+构造函数:(只实例化一次)
+_timeStamper  时间戳对象
+_sysPipe      系统pipe
+_defaultview   view.HonestView
+_displayList   显示列表
+_now        
+
+
+事件:
+registerEvents
+将事件回调函数,按照事件类型注册到this._defaultView.eventDecider()上面
+
+triggerEvent:
+this._level.switchPipeTriggerEvent(evt);
+
+
+
+
+注册事件两种事件
+mouseevt{
+	type:
+	mouseX:
+	mouseY:
+}
+keyevt{
+	type:
+	key:
+	keyCode:
+}
+
+
+
+
+
+
+
+19.lib/colorbox/pipe   管道
+默认的pipe类型结构 create_empty_pipe
+{
+	_ptype:"pipe",
+	_key:{
+		current:{
+			_key:{}
+			_next:null
+		}
+	}
+}
+默认的额event类型:make_event(content,now)
+{
+	_key:{
+		content:content,
+		time:now
+	},
+	_next:null
+}
+
+<dl>
+	<dt>createEventTrigger()</dt>
+	<dd>
+		<pre>
+			{
+				_ptype:"trigger",
+				_key:{
+					current:{   //(event接口)
+						_key:{}
+						_next:null
+					}
+					clocker:clocker
+				}
+			}
+		</pre>
+	</dd>
+	<dt>triggerEvent(ep,content)</dt>
+	<dd>
+		ep参数.由createEventTrigger返回
+		content为了创建 event类型
+		为某个ep事件触发,绑定事件..返回事件  这个程序好像有点问题.
+	</dd>
+	<dt>nothing()</dt>
+	<dd>什么都没干,返回一个对象.输出字符窜"nothing-happen"</dd>
+	<dt>createPort()</dt>
+	<dd>工厂函数,返回一个对象</dd>
+	<dt>mapP()</dt>
+	<dd></dd>
+	<dt>filterP()</dt>
+	<dd></dd>
+	<dt>orP()</dt>
+	<dd></dd>
+	<dt>andP()</dt>
+	<dd></dd>
+	<dt>mergeP()</dt>
+	<dd></dd>
+	<dt>createSwitcher()</dt>
+	<dd></dd>
+	<dt>switchSource()</dt>
+	<dd></dd>
+</dl>
+
+
+
+20.lib/colorbox/debug
+添加控制台调试.
+assert : function(exp,msg)   //判断exp是否为false,不为的话则返回.为的话.则跑出异常
+
+
+21.lib/colorbox/globalClocker
+
+最后返回一个g_clocker对象.original是个函数
+
+<pre>
+var g_clocker = {
+  now:function()
+  {
+    if (this.original)
+      return this.original();
+    else
+      return 0;
+  },
+  
+  original:null,
+};
+
+var globalClocker = function(original)
+{
+  if (original)
+  {
+    debug.assert(!g_clocker.original, "set global clocker's original clocker again");
+    if (!g_clocker.original)
+      g_clocker.original = original;
+  }
+
+  return g_clocker;
+};
+</pre>
+两个函数
+
+使用方法
+<pre>
+    var clockf = function()
+    {
+      return self._now;
+    };
+    
+    globalClocker(clockf);
+</pre>

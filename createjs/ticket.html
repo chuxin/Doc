@@ -1,0 +1,80 @@
+<h2>ticket</h2>
+ticket就是心跳.同样继承了EventDispatcher.
+
+
+
+<h3>方法</h3>
+<dl>
+	<dt>setInterval</dt>
+	<dd>
+		设置心跳时间
+	</dd>
+	<dt>getInterval()</dt>
+	<dd>
+		获取当前心跳时间
+	</dd>
+	<dt>setFPS()</dt>
+	<dd>设置FPS.1000/fps</dd>
+	<dt>getFPS()</dt>
+	<dd>获取fps</dd>
+	<dt>getMeasuredFPS()</dt>
+	<dd>返回</dd>
+	<dt>setPaused()</dt>
+	<dd>设置心跳暂停.可通过event.paused获取</dd>
+	<dt>getPaused()</dt>
+	<dd>
+		判断心跳是否暂停
+		<pre>
+			createjs.Ticker.addEventListener("tick", handleTick);
+			createjs.Ticker.setPaused(true);
+			function handleTick(event) {
+				console.log("Paused:", event.paused, createjs.Ticker.getPaused());
+			}
+		</pre>
+	</dd>
+	<dt>getTime()</dt>
+	<dd></dd>
+	<dt>getTicks()</dt>
+	<dd>返回心跳发出去了多少次心跳</dd>
+</dl>
+
+
+<pre>
+createjs.Ticker.addEventListener("tick", handleTick);
+createjs.Ticker.addEventListener("tick", handleTick2);
+//createjs.Ticker.setInterval(1000)  //设置心跳时间
+
+//createjs.Ticker.setFPS(1)   //设置fps.1000/fps
+
+
+
+function handleTick(event) {
+	console.log("aaaaaaa")
+}
+
+function handleTick2(event) {
+	console.log("bb")
+}
+</pre>
+
+
+
+
+
+<h2>显示对象的ticker</h2>
+
+<h3>Stage的update</h2>
+舞台在update时会从底层执行所有的容器和displayObject的Ontick和tick事件
+
+<h3>DisplayObject</h3>
+<ul>
+	<li>执行Ontick事件</li>
+	<li>执行addEventListen("tick",function)添加的事件</li>
+</ul>
+
+
+<h3>Container</h3>
+<ul>
+	<li>循环所有子类,并执行子类的tick</li>
+	<li>执行继承自DispalyObjer的tick</li>
+</ul>

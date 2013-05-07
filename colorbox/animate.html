@@ -1,0 +1,89 @@
+动画
+
+首先定义了n个动画函数
+<dl>
+	<dt>linear(v)</dt>
+	<dd>直线,直接返回v</dd>
+	<dt>set(v)</dt>
+	<dd>求一个最接近它的整数,它的值小于或等于这个浮点数.向下取整Math.floor(v)</dd>
+	<dt>discrete(v)</dt>
+	<dd>同上</dd>
+	<dt>sine(v)</dt>
+	<dd>v*Math.PI    正弦值.0.5-0.5*Math.cos(v*Math.PI) 
+<pre>
+Math.sin(x)    x 的正玄值。返回值在 -1.0 到 1.0 之间；
+Math.cos(x)    x 的余弦值。返回的是 -1.0 到 1.0 之间的数；
+
+弧长:在圆上过2点的一段弧的长度。
+
+弧长的计算公式为: 周长(2*PI*r) /360 * 角度  (每度所对应的弧长乘以角度)
+
+弧度:弧长等于半径的弧，其所对的圆心角为1弧度.X 都是指的“弧度”而非“角度”，即当前弧长所对的弧度=弧长/半径
+弧度的计算公式.2*PI*r/360*角度/r====2*PI/360*角度
+30°角度 的弧度 = 2*PI/360*30
+
+
+如何得到圆上每个点的坐标？
+
+解决思路：根据三角形的正玄、余弦来得值；
+
+假设一个圆的圆心坐标是(a,b)，半径为r，
+
+则圆上每个点的X坐标=a + Math.sin(2*Math.PI / 360) * r ；Y坐标=b + Math.cos(2*Math.PI / 360) * r ；
+
+ 
+
+如何求时钟的秒针转动一圈的轨迹？
+
+假设秒针的初始值（起点）为12点钟方向，圆心的坐标为（a,b)。
+
+解决思路：一分钟为60秒，一个圆为360°，所以平均每秒的转动角度为 360°/60 = 6°；
+
+
+for(var times=0; times < 60; times++) {
+
+      var hudu = (2*Math.PI / 360) * 6 * times;
+
+       var X = a + Math.sin(hudu) * r;
+
+       var Y = b - Math.cos(hudu) * r    //  注意此处是“-”号，因为我们要得到的Y是相对于（0,0）而言的。
+
+}
+</pre>
+	</dd>
+	<dt>sproing(v)</dt>
+	<dd>跳跃,(0.5-0.5*Math.cos(v*3.59261946538606)) * 1.05263157894737</dd>
+	<dt>square(v)</dt>
+	<dd>平方</dd>
+	<dt>cube</dt>
+	<dd>立方</dd>
+	<dt>sqrt</dt>
+	<dd>开平方</dd>
+	<dt>curt</dt>
+	<dd>返回指定数字的指定次幂</dd>
+	<dt>lift</dt>
+	<dd></dd>
+	<dt>consttl</dt>
+	<dd></dd>
+	<dt>slerptl</dt>
+	<dd></dd>
+	<dt>maptl</dt>
+	<dd></dd>
+	<dt>reversetl</dt>
+	<dd></dd>
+	<dt>foldltl</dt>
+	<dd></dd>
+	<dt>addtl</dt>
+	<dd></dd>
+	<dt>subtl</dt>
+	<dd></dd>
+	<dt>multl</dt>
+	<dd></dd>
+</dl>
+
+<h2>AnimationBase</h2>
+所有动画的基类
+
+<h2>Animation</h2>
+父类AnimationBase
+
